@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QRLogix - Confirmación</title>
+    <style>
+        body {
+            background-color: #fff;
+            color: #071D49;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            height: 80vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header img {
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+        .timeline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        .timeline .circle {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: #071D49;
+            flex-shrink: 0;
+            position: relative;
+            font-size: 1rem;
+        }
+        .timeline .circle .label {
+            position: absolute;
+            top: 55px;
+            font-size: 0.75rem;
+            width: max-content;
+            color: #071D49;
+        }
+        .timeline .line {
+            flex: 1;
+            height: 4px;
+            background-color: #CCC;
+            margin: 0 5px;
+        }
+        .timeline .circle.completed {
+            background-color: #C4D600;
+            color: white;
+        }
+        .timeline .circle.current {
+            background-color: #071D49;
+            color: white;
+        }
+        .timeline .circle.skipped {
+            background-color: red;
+            color: white;
+        }
+        .timeline .circle.pending {
+            background-color: #ccc;
+            color: #071D49;
+        }
+        .mensaje {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+        }
+        .placa {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #0033FF;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="/static/imagenes/ARG_logo_ver_color_no_background.png" alt="Logo Empresa">
+        </header>
+
+        <div class="timeline">
+            {% for punto in puntos %}
+                <div class="circle {{ estados[punto] }}">
+                    {% if estados[punto] == 'completed' %}✓
+                    {% elif estados[punto] == 'skipped' %}✗
+                    {% else %}{{ loop.index }}{% endif %}
+                    <span class="label">{{ nombres[punto] }}</span>
+                </div>
+                {% if not loop.last %}
+                    <div class="line"></div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="mensaje">
+            ✅ Gracias. El {{ punto }} se ha escaneado correctamente.
+        </div>
+        <span class="placa">Placa: {{ placa }}</span>
+        <span class="placa">Hora: {{ hora }}</span>
+    </div>
+</body>
+</html>

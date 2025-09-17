@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QRLogix</title>
+    <style>
+        body {
+            background-color: #fff;
+            color: #071D49;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 25px;
+        }
+        header img {
+            max-width: 150px;
+            margin-top: 10px;
+        }
+        h1 {
+            font-size: 1.4rem;
+            margin-top: 20px;
+        }
+        form {
+            margin-top: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 1.2rem;
+            width: 80%;
+            max-width: 300px;
+            border: 2px solid #071D49;
+            border-radius: 8px;
+            text-align: center;
+        }
+        button {
+            background-color: #071D49;
+            color: #fff;
+            font-size: 1.1rem;
+            padding: 10px 20px;
+            margin-top: 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        button:disabled, input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .mensaje {
+            margin-top: 50px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <!-- Logo de la empresa -->
+        <img src="/static/imagenes/ARG_logo_ver_color_no_background.png" alt="Logo Empresa">
+    </header>
+    <h1>Bienvenido, por favor ingrese el número de placa de su vehículo.</h1>
+    <!-- Cambiamos el action a /scan/{{ punto }} -->
+    <form action="/scan/{{ punto }}" method="post">
+        <!-- Campo oculto con el punto escaneado -->
+        <input type="hidden" name="punto" value="{{ punto }}">
+
+        <input type="text" name="plate" placeholder="Ej: EH1234" required autocomplete="off" {% if submitted %}disabled{% endif %}>
+        <button type="submit" {% if submitted %}disabled{% endif %}>Registrar</button>
+    </form>
+    {% if message %}
+    <div class="mensaje">{{ message }}</div>
+    {% endif %}
+</body>
+</html>
