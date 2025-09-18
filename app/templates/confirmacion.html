@@ -3,6 +3,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QRLogix - Confirmación</title>
     <style>
         body {
@@ -10,28 +11,43 @@
             color: #071D49;
             font-family: Arial, sans-serif;
             margin: 0;
-            height: 80vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             text-align: center;
         }
-        .container { width: 100%; max-width: 600px; padding: 20px; }
-        header img { max-width: 150px; margin-bottom: 20px; }
-        .timeline { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; }
-        .timeline .circle {
-            width: 45px; height: 45px; border-radius: 50%; display: flex;
-            justify-content: center; align-items: center; font-weight: bold;
-            flex-shrink: 0; position: relative;
+        .container { width: 100%; max-width: 600px; padding: 15px; }
+        header img { max-width: 120px; margin-bottom: 15px; }
+        .timeline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
         }
-        .timeline .circle .label { position: absolute; top: 55px; font-size: 0.75rem; }
-        .timeline .line { flex: 1; height: 4px; background-color: #CCC; margin: 0 5px; }
+        .timeline .circle {
+            width: 45px; height: 45px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold; flex-shrink: 0; position: relative;
+            margin: 5px;
+        }
+        .timeline .circle .label {
+            position: absolute; top: 55px;
+            font-size: 0.75rem; white-space: nowrap;
+        }
+        .timeline .line {
+            flex: 1; height: 4px; background-color: #CCC; margin: 0 5px;
+        }
         .completed { background-color: #C4D600; color: white; }
-        .current { background-color: #071D49; color: white; }
         .skipped { background-color: red; color: white; }
         .pending { background-color: #ccc; color: #071D49; }
-        .mensaje { font-size: 1.2rem; font-weight: bold; margin: 20px 0 10px 0; }
-        .placa { font-size: 1.2rem; font-weight: bold; color: #0033FF; display: block; }
+        .mensaje { font-size: 1.1rem; font-weight: bold; margin: 20px 0 10px 0; }
+        .placa { font-size: 1rem; font-weight: bold; color: #0033FF; display: block; margin-top: 5px; }
+        @media (max-width: 480px) {
+            .timeline { flex-direction: column; }
+            .timeline .line { display: none; }
+        }
     </style>
 </head>
 <body>

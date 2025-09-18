@@ -37,7 +37,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
             "request": request,
             "punto": punto,
             "placa": sesion.camion.placa,
-            "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%H:%M:%S"),
+            "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%I:%M:%p"),
             "puntos": ["punto1", "punto2", "punto3", "punto4"],
             "estados": {e.punto: "completed" for e in sesion.escaneos},  # ejemplo simple
             "nombres": {"punto1": "Ingreso", "punto2": "Carga", "punto3": "Salida patio", "punto4": "Control final"}
