@@ -5,15 +5,14 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app import crud
+from app.utils.timezone import convertir_a_panama
 import uuid
-from datetime import datetime
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
 COOKIE_NAME = "device_id"
 COOKIE_MAX_AGE = 365 * 24 * 60 * 60  # 1 año
-
 
 def ensure_device_cookie(request: Request, response) -> str:
     device_id = request.cookies.get(COOKIE_NAME)
@@ -28,59 +27,42 @@ def ensure_device_cookie(request: Request, response) -> str:
         )
     return device_id
 
-
 @router.get("/scan/{punto}", response_class=HTMLResponse)
 async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
-    # Si hay sesión activa por IP, registra directo
     client_ip = request.client.host
     sesion = crud.get_sesion_activa_por_ip(db, client_ip)
     if sesion:
-        crud.create_escaneo(db, sesion.id, punto)
-        return RedirectResponse(
-            url=f"/confirmacion?punto={punto}&placa={sesion.camion.placa}",
-            status_code=303
-        )
+        escaneo = crud.create_escaneo(db, sesion.id, punto)
+        return templates.TemplateResponse("confirmacion.html", {
+            "request": request,
+            "punto": punto,
+            "placa": sesion.camion.placa,
+            "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%H:%M:%S"),
+            "puntos": ["punto1", "punto2", "punto3", "punto4"],
+            "estados": {e.punto: "completed" for e in sesion.escaneos},  # ejemplo simple
+            "nombres": {"punto1": "Ingreso", "punto2": "Carga", "punto3": "Salida patio", "punto4": "Control final"}
+        })
 
-    # Si no hay sesión → mostrar formulario de placa
     return templates.TemplateResponse("index.html", {
         "request": request,
         "punto": punto,
         "submitted": False
     })
 
-
 @router.post("/scan/{punto}", response_class=HTMLResponse)
 async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db: Session = Depends(get_db)):
-    # Set cookie si no existe
-    response = RedirectResponse(url=f"/confirmacion?punto={punto}&placa={plate}", status_code=303)
+    response = RedirectResponse(url=f"/scan/{punto}?placa={plate}", status_code=303)
     ensure_device_cookie(request, response)
 
-    # Flujo normal: crear camión si no existe
     client_ip = request.client.host
     camion = crud.get_camion_by_placa(db, plate)
     if not camion:
         camion = crud.create_camion(db, plate, dispositivo_id=client_ip)
 
-    # Buscar sesión activa; si no existe, crearla
     sesion = crud.get_sesion_activa_por_ip(db, client_ip)
     if not sesion:
         sesion = crud.create_sesion(db, camion.id)
 
-    # Registrar escaneo
     crud.create_escaneo(db, sesion.id, punto)
 
     return response
-
-
-# ✅ Nueva ruta de confirmación
-@router.get("/confirmacion", response_class=HTMLResponse)
-async def confirmacion(request: Request, punto: str, placa: str, hora: str = None):
-    if not hora:
-        hora = datetime.utcnow().strftime("%H:%M:%S")
-
-    return templates.TemplateResponse("confirmacion.html", {
-        "request": request,
-        "punto": punto,
-        "placa": placa,
-        "hora": hora
-    })

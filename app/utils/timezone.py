@@ -1,10 +1,13 @@
-# app/utils/timezone.py
+# horas de panama
 from datetime import datetime
-import pytz
+from zoneinfo import ZoneInfo
 
-# Definir la zona horaria de Panamá
-PANAMA_TZ = pytz.timezone("America/Panama")
-
-def now_panama():
+def ahora_panama() -> datetime:
     """Devuelve la hora actual en la zona horaria de Panamá"""
-    return datetime.now(PANAMA_TZ)
+    return datetime.now(ZoneInfo("America/Panama"))
+
+def convertir_a_panama(dt: datetime) -> datetime:
+    """Convierte un datetime UTC a hora Panamá"""
+    if dt is None:
+        return None
+    return dt.astimezone(ZoneInfo("America/Panama"))

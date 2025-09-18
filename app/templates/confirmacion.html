@@ -1,10 +1,9 @@
+<!-- app/templates/confirmacion.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QRLogix - Confirmación</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
         body {
             background-color: #fff;
@@ -17,79 +16,22 @@
             align-items: center;
             text-align: center;
         }
-        .container {
-            width: 100%;
-            max-width: 600px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        header img {
-            max-width: 150px;
-            margin-bottom: 20px;
-        }
-        .timeline {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            margin: 20px 0;
-            overflow-x: auto;
-        }
+        .container { width: 100%; max-width: 600px; padding: 20px; }
+        header img { max-width: 150px; margin-bottom: 20px; }
+        .timeline { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; }
         .timeline .circle {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            color: #071D49;
-            flex-shrink: 0;
-            position: relative;
-            font-size: 1rem;
+            width: 45px; height: 45px; border-radius: 50%; display: flex;
+            justify-content: center; align-items: center; font-weight: bold;
+            flex-shrink: 0; position: relative;
         }
-        .timeline .circle .label {
-            position: absolute;
-            top: 55px;
-            font-size: 0.75rem;
-            width: max-content;
-            color: #071D49;
-        }
-        .timeline .line {
-            flex: 1;
-            height: 4px;
-            background-color: #CCC;
-            margin: 0 5px;
-        }
-        .timeline .circle.completed {
-            background-color: #C4D600;
-            color: white;
-        }
-        .timeline .circle.current {
-            background-color: #071D49;
-            color: white;
-        }
-        .timeline .circle.skipped {
-            background-color: red;
-            color: white;
-        }
-        .timeline .circle.pending {
-            background-color: #ccc;
-            color: #071D49;
-        }
-        .mensaje {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin: 20px 0 10px 0;
-        }
-        .placa {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #0033FF;
-            display: block;
-        }
+        .timeline .circle .label { position: absolute; top: 55px; font-size: 0.75rem; }
+        .timeline .line { flex: 1; height: 4px; background-color: #CCC; margin: 0 5px; }
+        .completed { background-color: #C4D600; color: white; }
+        .current { background-color: #071D49; color: white; }
+        .skipped { background-color: red; color: white; }
+        .pending { background-color: #ccc; color: #071D49; }
+        .mensaje { font-size: 1.2rem; font-weight: bold; margin: 20px 0 10px 0; }
+        .placa { font-size: 1.2rem; font-weight: bold; color: #0033FF; display: block; }
     </style>
 </head>
 <body>
@@ -100,9 +42,9 @@
 
         <div class="timeline">
             {% for punto in puntos %}
-                <div class="circle {{ estados[punto] }}">
-                    {% if estados[punto] == 'completed' %}✓
-                    {% elif estados[punto] == 'skipped' %}✗
+                <div class="circle {{ estados.get(punto, 'pending') }}">
+                    {% if estados.get(punto) == 'completed' %}✓
+                    {% elif estados.get(punto) == 'skipped' %}✗
                     {% else %}{{ loop.index }}{% endif %}
                     <span class="label">{{ nombres[punto] }}</span>
                 </div>
@@ -112,17 +54,11 @@
             {% endfor %}
         </div>
 
-        <div style="display: flex; flex-direction: column; align-items: center;">
-            <i class="fa-light fa-circle-check" style="color: #c4d600; font-size: 3rem; margin-bottom: 10px;"></i>
-            <div class="mensaje" style="margin: 0 0 10px 0;">¡Gracias, buen trabajo!</div>
-        </div>
         <div class="mensaje">
-            El {{ punto }} se ha escaneado correctamente.
+            ✅ Gracias. El {{ punto }} se ha escaneado correctamente.
         </div>
-        <div style="display: flex; flex-direction: column; align-items: center;">
-            <span class="placa">Placa: {{ placa }}</span>
-            <span class="placa">Hora: {{ hora }}</span>
-        </div>
+        <span class="placa">Placa: {{ placa }}</span>
+        <span class="placa">Hora: {{ hora }}</span>
     </div>
 </body>
 </html>
