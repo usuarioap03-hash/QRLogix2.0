@@ -33,13 +33,21 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
     sesion = crud.get_sesion_activa_por_ip(db, client_ip)
     if sesion:
         escaneo = crud.create_escaneo(db, sesion.id, punto)
+        estados = {}
+        for idx, p in enumerate(["punto1", "punto2", "punto3", "punto4"], start=1):
+            if any(e.punto == p for e in sesion.escaneos):
+                estados[p] = "completed"
+            elif any(e.punto == f"punto{idx+1}" for e in sesion.escaneos):
+                estados[p] = "skipped"
+            else:
+                estados[p] = "pending"
         return templates.TemplateResponse("confirmacion.html", {
             "request": request,
             "punto": punto,
             "placa": sesion.camion.placa,
             "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%I:%M:%p"),
             "puntos": ["punto1", "punto2", "punto3", "punto4"],
-            "estados": {e.punto: "completed" for e in sesion.escaneos},  # ejemplo simple
+            "estados": estados,
             "nombres": {"punto1": "Ingreso", "punto2": "Carga", "punto3": "Salida patio", "punto4": "Control final"}
         })
 
