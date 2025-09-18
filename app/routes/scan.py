@@ -28,7 +28,7 @@ def ensure_device_cookie(request: Request, response) -> str:
 
 @router.get("/scan/{punto}", response_class=HTMLResponse)
 async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
-    # Si hay sesión activa por IP (o lo que uses en Camion.dispositivo_id), registra directo
+    # Si hay sesión activa por IP, registra directo
     client_ip = request.client.host
     sesion = crud.get_sesion_activa_por_ip(db, client_ip)
     if sesion:
@@ -49,14 +49,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
 async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db: Session = Depends(get_db)):
     # Set cookie si no existe
     response = RedirectResponse(url=f"/confirmacion?punto={punto}&placa={plate}", status_code=303)
-    device_id = ensure_device_cookie(request, response)
-
-    # Validar que el dispositivo esté autorizado para esa placa
-    if not crud.dispositivo_autorizado_valido(db, device_id, plate):
-        return HTMLResponse(
-            "<h2 style='color:red'>❌ Dispositivo o placa no autorizados. Regístrese en capacitación.</h2>",
-            status_code=403
-        )
+    ensure_device_cookie(request, response)
 
     # Flujo normal: crear camión si no existe
     client_ip = request.client.host
@@ -67,7 +60,7 @@ async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db:
     # Buscar sesión activa; si no existe, crearla
     sesion = crud.get_sesion_activa_por_ip(db, client_ip)
     if not sesion:
-        sesion = crud.create_sesion(db, camion.id)  # usa minutos desde config
+        sesion = crud.create_sesion(db, camion.id)
 
     # Registrar escaneo
     crud.create_escaneo(db, sesion.id, punto)

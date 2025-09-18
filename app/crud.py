@@ -1,7 +1,4 @@
 # app/crud.py
-# funciones de CRUD acceso a datos
-# (Crear=POST, Leer=GET, Actualizar=PUT, Eliminar=DELETE)
-
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from . import models
@@ -71,7 +68,7 @@ def create_escaneo(db: Session, sesion_id: int, punto: str):
         .first()
     )
     if ya:
-        return ya  # evita duplicados por refresh o recarga del QR
+        return ya
 
     escaneo = models.Escaneo(
         sesion_id=sesion_id,
@@ -95,23 +92,3 @@ def create_alerta(db: Session, sesion_id: int, punto_saltado: str):
     db.commit()
     db.refresh(alerta)
     return alerta
-
-# ------------------ SEGURIDAD: PLACAS AUTORIZADAS ------------------
-def placa_autorizada_existe(db: Session, placa: str) -> bool:
-    return db.query(models.PlacaAutorizada).filter_by(placa=placa).first() is not None
-
-# ------------------ SEGURIDAD: DISPOSITIVOS AUTORIZADOS ------------------
-def registrar_dispositivo_autorizado(db: Session, dispositivo_id: str, placa: str):
-    disp = models.DispositivoAutorizado(dispositivo_id=dispositivo_id, placa=placa)
-    db.add(disp)
-    db.commit()
-    db.refresh(disp)
-    return disp
-
-def dispositivo_autorizado_valido(db: Session, dispositivo_id: str, placa: str) -> bool:
-    return (
-        db.query(models.DispositivoAutorizado)
-        .filter_by(dispositivo_id=dispositivo_id, placa=placa)
-        .first()
-        is not None
-    )
