@@ -17,36 +17,84 @@
             align-items: center;
             text-align: center;
         }
-        .container { width: 100%; max-width: 600px; padding: 15px; }
-        header img { max-width: 120px; margin-bottom: 15px; }
+        .container { 
+            width: 100%; 
+            max-width: 600px; 
+            padding: 15px; 
+        }
+
+        header img { 
+            max-width: 120px; 
+            margin-bottom: 15px; 
+        }
+        
         .timeline {
             display: flex;
-            justify-content: space-between;
+            justify-content: space-evenly;
             align-items: center;
             flex-wrap: wrap;
             margin: 20px 0;
         }
         .timeline .circle {
-            width: 45px; height: 45px; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            font-weight: bold; flex-shrink: 0; position: relative;
+            width: 45px; 
+            height: 45px; 
+            border-radius: 50%;
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            font-weight: bold; 
+            flex-shrink: 0; 
+            position: relative;
             margin: 5px;
         }
         .timeline .circle .label {
-            position: absolute; top: 55px;
-            font-size: 0.75rem; white-space: nowrap;
+            position: absolute; 
+            top: 55px;
+            font-size: 0.75rem; 
+            white-space: nowrap;
         }
         .timeline .line {
-            flex: 1; height: 4px; background-color: #CCC; margin: 0 5px;
+            flex: 1; 
+            height: 4px; 
+            background-color: #CCC; 
+            margin: 0 5px;
         }
-        .completed { background-color: #C4D600; color: white; }
-        .skipped { background-color: red; color: white; }
-        .pending { background-color: #ccc; color: #071D49; }
-        .mensaje { font-size: 1.1rem; font-weight: bold; margin: 20px 0 10px 0; }
-        .placa { font-size: 1rem; font-weight: bold; color: #0033FF; display: block; margin-top: 5px; }
+        .completed { 
+            background-color: #C4D600; 
+            color: white; 
+        }
+
+        .skipped { background-color: red; 
+            color: white; 
+        }
+
+        .pending { 
+            background-color: #ccc; 
+            color: #071D49; 
+        }
+
+        .mensaje { 
+            font-size: 1.1rem; 
+            font-weight: bold; 
+            margin: 20px 0 10px 0; 
+        }
+
+        .placa { 
+            font-size: 1rem; 
+            font-weight: bold; 
+            color: #0033FF; 
+            display: block; 
+            margin-top: 5px; 
+        }
+
         @media (max-width: 480px) {
-            .timeline { flex-direction: column; }
-            .timeline .line { display: none; }
+            .timeline { 
+                flex-direction: column; 
+            }
+
+            .timeline .line { 
+                display: none; 
+            }
         }
     </style>
 </head>
