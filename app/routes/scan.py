@@ -6,12 +6,14 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app import crud
 import uuid
+from datetime import datetime
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
 COOKIE_NAME = "device_id"
 COOKIE_MAX_AGE = 365 * 24 * 60 * 60  # 1 año
+
 
 def ensure_device_cookie(request: Request, response) -> str:
     device_id = request.cookies.get(COOKIE_NAME)
@@ -25,6 +27,7 @@ def ensure_device_cookie(request: Request, response) -> str:
             samesite="Lax",
         )
     return device_id
+
 
 @router.get("/scan/{punto}", response_class=HTMLResponse)
 async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
@@ -44,6 +47,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
         "punto": punto,
         "submitted": False
     })
+
 
 @router.post("/scan/{punto}", response_class=HTMLResponse)
 async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db: Session = Depends(get_db)):
@@ -66,3 +70,17 @@ async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db:
     crud.create_escaneo(db, sesion.id, punto)
 
     return response
+
+
+# ✅ Nueva ruta de confirmación
+@router.get("/confirmacion", response_class=HTMLResponse)
+async def confirmacion(request: Request, punto: str, placa: str, hora: str = None):
+    if not hora:
+        hora = datetime.utcnow().strftime("%H:%M:%S")
+
+    return templates.TemplateResponse("confirmacion.html", {
+        "request": request,
+        "punto": punto,
+        "placa": placa,
+        "hora": hora
+    })
