@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QRLogix - Confirmación</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
         body {
             background-color: #fff;
@@ -111,11 +112,17 @@
             {% endfor %}
         </div>
 
-        <div class="mensaje">
-            ✅ Gracias. El {{ punto }} se ha escaneado correctamente.
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <i class="fa-light fa-circle-check" style="color: #c4d600; font-size: 3rem; margin-bottom: 10px;"></i>
+            <div class="mensaje" style="margin: 0 0 10px 0;">¡Gracias, buen trabajo!</div>
         </div>
-        <span class="placa">Placa: {{ placa }}</span>
-        <span class="placa">Hora: {{ hora }}</span>
+        <div class="mensaje">
+            El {{ punto }} se ha escaneado correctamente.
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <span class="placa">Placa: {{ placa }}</span>
+            <span class="placa">Hora: {{ hora }}</span>
+        </div>
     </div>
 </body>
 </html>
