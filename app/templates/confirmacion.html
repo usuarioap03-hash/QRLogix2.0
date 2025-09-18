@@ -27,51 +27,43 @@
             max-width: 120px; 
             margin-bottom: 15px; 
         }
-        
+
         .timeline {
             display: flex;
             justify-content: space-evenly;
             align-items: center;
-            flex-wrap: wrap;
+            width: 100%;
             margin: 20px 0;
         }
+
         .timeline .circle {
-            width: 45px; 
-            height: 45px; 
+            flex: 0 0 12%; /* cada punto ocupa % del ancho */
+            aspect-ratio: 1/1;
             border-radius: 50%;
             display: flex; 
             justify-content: center; 
             align-items: center;
             font-weight: bold; 
-            flex-shrink: 0; 
             position: relative;
-            margin: 5px;
         }
+
         .timeline .circle .label {
             position: absolute; 
-            top: 55px;
-            font-size: 0.75rem; 
+            top: 110%;
+            font-size: 0.7rem; 
             white-space: nowrap;
+            text-align: center;
         }
+
         .timeline .line {
             flex: 1; 
-            height: 4px; 
+            height: 3px; 
             background-color: #CCC; 
-            margin: 0 5px;
-        }
-        .completed { 
-            background-color: #C4D600; 
-            color: white; 
         }
 
-        .skipped { background-color: red; 
-            color: white; 
-        }
-
-        .pending { 
-            background-color: #ccc; 
-            color: #071D49; 
-        }
+        .completed { background-color: #C4D600; color: white; }
+        .skipped { background-color: red; color: white; }
+        .pending { background-color: #ccc; color: #071D49; }
 
         .mensaje { 
             font-size: 1.1rem; 
@@ -88,12 +80,8 @@
         }
 
         @media (max-width: 480px) {
-            .timeline { 
-                flex-direction: column; 
-            }
-
-            .timeline .line { 
-                display: none; 
+            .timeline .circle .label {
+                font-size: 0.6rem;
             }
         }
     </style>
