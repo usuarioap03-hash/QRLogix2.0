@@ -1,11 +1,15 @@
 # app/crud.py
+################################################
+
 from sqlalchemy.orm import Session
 from datetime import timedelta
 from . import models
 from app.config import SESSION_DURATION_MINUTES
 from app.utils.timezone import ahora_panama
 
+################################################
 # ------------------ CAMIONES ------------------
+################################################
 def get_camion_by_placa(db: Session, placa: str):
     return db.query(models.Camion).filter(models.Camion.placa == placa).first()
 
@@ -16,7 +20,9 @@ def create_camion(db: Session, placa: str, dispositivo_id: str = None):
     db.refresh(camion)
     return camion
 
+################################################
 # ------------------ SESIONES ------------------
+################################################
 def get_sesion_activa(db: Session, camion_id: int):
     ahora = ahora_panama()
     return (
@@ -52,8 +58,10 @@ def create_sesion(db: Session, camion_id: int, minutes: int | None = None):
     db.refresh(sesion)
     return sesion
 
+################################################
 # ------------------ ESCANEOS ------------------
-def create_escaneo(db: Session, sesion_id: int, punto: str):
+################################################
+def create_escaneo(db: Session, sesion_id: int, punto: str): 
     ya = (
         db.query(models.Escaneo)
         .filter(

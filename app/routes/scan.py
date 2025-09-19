@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app import crud
-from app.utils.timezone import convertir_a_panama
+from app.utils.timezone import convertir_a_panama, ahora_panama
 import uuid
 
 router = APIRouter()
@@ -41,14 +41,18 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
                 estados[p] = "skipped"
             else:
                 estados[p] = "pending"
+        # Si es el último punto, cerrar ciclo (sesión)
+        if punto == "punto4":
+            sesion.fin = ahora_panama()
+            db.commit()
         return templates.TemplateResponse("confirmacion.html", {
             "request": request,
             "punto": punto,
             "placa": sesion.camion.placa,
-            "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%I:%M:%p"),
+            "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%-I:%M:%S %p"),        #hora que se muestra
             "puntos": ["punto1", "punto2", "punto3", "punto4"],
             "estados": estados,
-            "nombres": {"punto1": "Ingreso", "punto2": "Carga", "punto3": "Salida patio", "punto4": "Control final"}
+            "nombres": {"punto1": "Ingreso", "punto2": "Espera", "punto3": "Carga", "punto4": "Salida"}
         })
 
     return templates.TemplateResponse("index.html", {
