@@ -32,9 +32,17 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
     client_ip = request.client.host
     sesion = crud.get_sesion_activa_por_ip(db, client_ip)
     if sesion:
+        # If session is closed or expired, redirect to index for new plate
+        if sesion.fin is not None:
+            return templates.TemplateResponse("index.html", {
+                "request": request,
+                "punto": punto,
+                "submitted": False
+            })
         escaneo = crud.create_escaneo(db, sesion.id, punto)
         estados = {}
-        for idx, p in enumerate(["punto1", "punto2", "punto3", "punto4"], start=1):
+        puntos_list = ["punto1", "punto2", "punto3", "punto4"]
+        for idx, p in enumerate(puntos_list, start=1):
             if any(e.punto == p for e in sesion.escaneos):
                 estados[p] = "completed"
             elif any(e.punto == f"punto{idx+1}" for e in sesion.escaneos):
@@ -50,7 +58,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
             "punto": punto,
             "placa": sesion.camion.placa,
             "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%-I:%M:%S %p"),        #hora que se muestra
-            "puntos": ["punto1", "punto2", "punto3", "punto4"],
+            "puntos": puntos_list,
             "estados": estados,
             "nombres": {"punto1": "Ingreso", "punto2": "Espera", "punto3": "Carga", "punto4": "Salida"}
         })
@@ -72,7 +80,12 @@ async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db:
         camion = crud.create_camion(db, plate, dispositivo_id=client_ip)
 
     sesion = crud.get_sesion_activa_por_ip(db, client_ip)
-    if not sesion:
+    # Re-use session only if active and last point not final; otherwise create new session
+    if sesion and sesion.fin is None:
+        puntos_escaneados = [e.punto for e in sesion.escaneos]
+        if "punto4" in puntos_escaneados:
+            sesion = crud.create_sesion(db, camion.id)
+    else:
         sesion = crud.create_sesion(db, camion.id)
 
     crud.create_escaneo(db, sesion.id, punto)

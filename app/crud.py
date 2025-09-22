@@ -82,3 +82,28 @@ def create_escaneo(db: Session, sesion_id: int, punto: str):
     db.commit()
     db.refresh(escaneo)
     return escaneo
+
+
+# Cierra la sesión marcando 'fin' como la hora actual de Panamá.
+def cerrar_sesion(db: Session, sesion_id: int):
+    sesion = db.query(models.Sesion).filter(models.Sesion.id == sesion_id).first()
+    if sesion is None:
+        return None
+    ahora = ahora_panama()
+    sesion.fin = ahora
+    db.commit()
+    db.refresh(sesion)
+    return sesion
+
+
+# Verifica si la sesión ya registró el último punto y debe cerrarse.
+def sesion_finalizo_punto(db: Session, sesion_id: int, ultimo_punto: str):
+    escaneo = (
+        db.query(models.Escaneo)
+        .filter(
+            models.Escaneo.sesion_id == sesion_id,
+            models.Escaneo.punto == ultimo_punto,
+        )
+        .first()
+    )
+    return escaneo is not None

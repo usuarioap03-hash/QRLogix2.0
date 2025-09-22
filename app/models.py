@@ -1,5 +1,5 @@
 # app/models.py
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from app.database import Base
 from datetime import timedelta
@@ -19,6 +19,7 @@ class Sesion(Base):
     camion_id = Column(Integer, ForeignKey("camiones.id", ondelete="CASCADE"))
     inicio = Column(DateTime, default=ahora_panama)
     fin = Column(DateTime, default=lambda: ahora_panama() + timedelta(minutes=SESSION_DURATION_MINUTES))
+    cerrada = Column(Boolean, default=False)  # Marca si la sesión terminó por completar ciclo
     camion = relationship("Camion", back_populates="sesiones")
     escaneos = relationship("Escaneo", back_populates="sesion", cascade="all, delete-orphan")
 
