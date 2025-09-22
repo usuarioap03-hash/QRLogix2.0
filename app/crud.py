@@ -13,8 +13,8 @@ from app.utils.timezone import ahora_panama
 def get_camion_by_placa(db: Session, placa: str):
     return db.query(models.Camion).filter(models.Camion.placa == placa).first()
 
-def create_camion(db: Session, placa: str, dispositivo_id: str = None):
-    camion = models.Camion(placa=placa, dispositivo_id=dispositivo_id)
+def create_camion(db: Session, placa: str, device_cookie: str = None):
+    camion = models.Camion(placa=placa, device_cookie=device_cookie)
     db.add(camion)
     db.commit()
     db.refresh(camion)
@@ -35,13 +35,16 @@ def get_sesion_activa(db: Session, camion_id: int):
         .first()
     )
 
-def get_sesion_activa_por_ip(db: Session, dispositivo_id: str):
+def get_sesion_activa_por_cookie(db: Session, device_cookie: str):
+    """
+    Obtiene la sesión activa para un dispositivo identificado por cookie.
+    """
     ahora = ahora_panama()
     return (
         db.query(models.Sesion)
         .join(models.Camion)
         .filter(
-            models.Camion.dispositivo_id == dispositivo_id,
+            models.Camion.device_cookie == device_cookie,
             models.Sesion.fin > ahora,
         )
         .first()

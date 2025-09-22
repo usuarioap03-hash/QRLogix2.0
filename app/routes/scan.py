@@ -28,10 +28,10 @@ def ensure_device_cookie(request: Request, response) -> str:
 
 @router.get("/scan/{punto}", response_class=HTMLResponse)
 async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
-    client_ip = request.client.host
-    sesion = crud.get_sesion_activa_por_ip(db, client_ip)
+    device_id = request.cookies.get(COOKIE_NAME)
+    sesion = crud.get_sesion_activa_por_cookie(db, device_id)
     if sesion:
-        # If session is closed or expired, redirect to index for new plate
+        # Si la sesión ya está cerrada, redirige al index para pedir nueva placa
         if sesion.fin is not None:
             return templates.TemplateResponse("index.html", {
                 "request": request,
@@ -48,7 +48,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
                 estados[p] = "skipped"
             else:
                 estados[p] = "pending"
-        # Si es el último punto, cerrar ciclo (sesión)
+        # Cierra la sesión al llegar al último punto
         if punto == "punto4":
             sesion.fin = ahora_panama()
             db.commit()
@@ -56,7 +56,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
             "request": request,
             "punto": punto,
             "placa": sesion.camion.placa,
-            "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%-I:%M:%S %p"),        #hora que se muestra
+            "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%-I:%M:%S %p"),
             "puntos": puntos_list,
             "estados": estados,
             "nombres": {"punto1": "Ingreso", "punto2": "Espera", "punto3": "Carga", "punto4": "Salida"}
@@ -71,15 +71,14 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
 @router.post("/scan/{punto}", response_class=HTMLResponse)
 async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db: Session = Depends(get_db)):
     response = RedirectResponse(url=f"/scan/{punto}?placa={plate}", status_code=303)
-    ensure_device_cookie(request, response)
+    device_id = ensure_device_cookie(request, response)
 
-    client_ip = request.client.host
     camion = crud.get_camion_by_placa(db, plate)
     if not camion:
-        camion = crud.create_camion(db, plate, dispositivo_id=client_ip)
+        camion = crud.create_camion(db, plate, dispositivo_id=device_id)
 
-    sesion = crud.get_sesion_activa_por_ip(db, client_ip)
-    # Re-use session only if active and last point not final; otherwise create new session
+    sesion = crud.get_sesion_activa_por_cookie(db, device_id)
+    # Reutiliza la sesión si está activa y no se cerró en el último punto
     if sesion and sesion.fin is None:
         puntos_escaneados = [e.punto for e in sesion.escaneos]
         if "punto4" in puntos_escaneados:
