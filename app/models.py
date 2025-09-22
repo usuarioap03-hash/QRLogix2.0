@@ -17,13 +17,13 @@ class Sesion(Base):
     __tablename__ = "sesiones"
     id = Column(Integer, primary_key=True, index=True)
     camion_id = Column(Integer, ForeignKey("camiones.id", ondelete="CASCADE"))
-    inicio = Column(DateTime, default=ahora_panama, nullable=False)
+    inicio = Column(DateTime(timezone=True), default=ahora_panama, nullable=False)
     
     @staticmethod
     def default_fin():
         return ahora_panama() + timedelta(minutes=SESSION_DURATION_MINUTES)
 
-    fin = Column(DateTime, default=default_fin, nullable=False)
+    fin = Column(DateTime(timezone=True), default=default_fin, nullable=False)
     cerrada = Column(Boolean, default=False)  # Marca si la sesión terminó por completar ciclo
     camion = relationship("Camion", back_populates="sesiones")
     escaneos = relationship("Escaneo", back_populates="sesion", cascade="all, delete-orphan")
@@ -33,12 +33,5 @@ class Escaneo(Base):
     id = Column(Integer, primary_key=True, index=True)
     sesion_id = Column(Integer, ForeignKey("sesiones.id", ondelete="CASCADE"))
     punto = Column(String, nullable=False)
-    fecha_hora = Column(DateTime, default=ahora_panama, nullable=False)
+    fecha_hora = Column(DateTime(timezone=True), default=ahora_panama, nullable=False)
     sesion = relationship("Sesion", back_populates="escaneos")
-
-class Alerta(Base):
-    __tablename__ = "alertas"
-    id = Column(Integer, primary_key=True, index=True)
-    sesion_id = Column(Integer, ForeignKey("sesiones.id", ondelete="CASCADE"))
-    punto_saltado = Column(String, nullable=False)
-    fecha_hora = Column(DateTime, default=ahora_panama, nullable=False)
