@@ -10,8 +10,7 @@ class Camion(Base):
     __tablename__ = "camiones"
     id = Column(Integer, primary_key=True, index=True)
     placa = Column(String(20), unique=True, index=True, nullable=False)
-    dispositivo_id = Column(String, nullable=True)
-    cookie_id = Column(String, nullable=True)  # Identificador único por cookie
+    device_cookie = Column(String, nullable=True)  # Identificador único por cookie
     sesiones = relationship("Sesion", back_populates="camion", cascade="all, delete-orphan")
 
 class Sesion(Base):
