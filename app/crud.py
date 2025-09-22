@@ -8,7 +8,7 @@ from app.config import SESSION_DURATION_MINUTES
 from app.utils.timezone import ahora_panama
 
 ################################################
-# ------------------ CAMIONES ------------------
+# -------------------- CAMIONES --------------------
 ################################################
 def get_camion_by_placa(db: Session, placa: str):
     return db.query(models.Camion).filter(models.Camion.placa == placa).first()
@@ -21,7 +21,7 @@ def create_camion(db: Session, placa: str, dispositivo_id: str = None):
     return camion
 
 ################################################
-# ------------------ SESIONES ------------------
+# -------------------- SESIONES --------------------
 ################################################
 def get_sesion_activa(db: Session, camion_id: int):
     ahora = ahora_panama()
@@ -59,7 +59,7 @@ def create_sesion(db: Session, camion_id: int, minutes: int | None = None):
     return sesion
 
 ################################################
-# ------------------ ESCANEOS ------------------
+# -------------------- ESCANEOS --------------------
 ################################################
 def create_escaneo(db: Session, sesion_id: int, punto: str): 
     ya = (
@@ -83,7 +83,9 @@ def create_escaneo(db: Session, sesion_id: int, punto: str):
     db.refresh(escaneo)
     return escaneo
 
-
+################################################
+# ------------------ GESTIÓN DE SESIONES ------------------
+################################################
 # Cierra la sesión marcando 'fin' como la hora actual de Panamá.
 def cerrar_sesion(db: Session, sesion_id: int):
     sesion = db.query(models.Sesion).filter(models.Sesion.id == sesion_id).first()
