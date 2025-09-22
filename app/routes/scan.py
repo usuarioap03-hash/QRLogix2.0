@@ -30,28 +30,30 @@ def ensure_device_cookie(request: Request, response) -> str:
 async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
     device_id = request.cookies.get(COOKIE_NAME)
     sesion = crud.get_sesion_activa_por_cookie(db, device_id)
-    if sesion:
-        # Si la sesión ya está cerrada, redirige al index para pedir nueva placa
-        if sesion.fin is not None:
-            return templates.TemplateResponse("index.html", {
-                "request": request,
-                "punto": punto,
-                "submitted": False
-            })
+
+    # Si hay sesión y NO está expirada, registrar y confirmar
+    if sesion and ahora_panama() <= sesion.fin:
         escaneo = crud.create_escaneo(db, sesion.id, punto)
-        estados = {}
+
+        # Construir estados (completed/skipped/pending) de manera determinista
         puntos_list = ["punto1", "punto2", "punto3", "punto4"]
+        ya = {e.punto for e in sesion.escaneos}
+        ya.add(punto)  # asegura incluir el recién creado
+
+        estados = {}
         for idx, p in enumerate(puntos_list, start=1):
-            if any(e.punto == p for e in sesion.escaneos):
+            if p in ya:
                 estados[p] = "completed"
-            elif any(e.punto == f"punto{idx+1}" for e in sesion.escaneos):
+            elif any(f"punto{idx+1}" in ya):
                 estados[p] = "skipped"
             else:
                 estados[p] = "pending"
-        # Cierra la sesión al llegar al último punto
+
+        # Si es el último punto, cerrar ciclo
         if punto == "punto4":
             sesion.fin = ahora_panama()
             db.commit()
+
         return templates.TemplateResponse("confirmacion.html", {
             "request": request,
             "punto": punto,
@@ -62,6 +64,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
             "nombres": {"punto1": "Ingreso", "punto2": "Espera", "punto3": "Carga", "punto4": "Salida"}
         })
 
+    # Si no hay sesión activa o está expirada → pedir placa
     return templates.TemplateResponse("index.html", {
         "request": request,
         "punto": punto,
@@ -71,21 +74,24 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
 @router.post("/scan/{punto}", response_class=HTMLResponse)
 async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db: Session = Depends(get_db)):
     response = RedirectResponse(url=f"/scan/{punto}?placa={plate}", status_code=303)
-    device_id = ensure_device_cookie(request, response)
+    device_cookie = ensure_device_cookie(request, response)
 
+    # Camión por placa; si no existe, lo creamos guardando la cookie
     camion = crud.get_camion_by_placa(db, plate)
     if not camion:
-        camion = crud.create_camion(db, plate, dispositivo_id=device_id)
+        camion = crud.create_camion(db, plate, device_cookie=device_cookie)
 
-    sesion = crud.get_sesion_activa_por_cookie(db, device_id)
-    # Reutiliza la sesión si está activa y no se cerró en el último punto
-    if sesion and sesion.fin is None:
-        puntos_escaneados = [e.punto for e in sesion.escaneos]
+    # Ver si ya hay sesión activa para esa cookie
+    sesion = crud.get_sesion_activa_por_cookie(db, device_cookie)
+
+    # Si hay sesión activa pero ya llegó al último punto, arrancar un nuevo ciclo
+    if sesion and ahora_panama() <= sesion.fin:
+        puntos_escaneados = {e.punto for e in sesion.escaneos}
         if "punto4" in puntos_escaneados:
             sesion = crud.create_sesion(db, camion.id)
     else:
+        # Expirada o inexistente → nueva sesión
         sesion = crud.create_sesion(db, camion.id)
 
     crud.create_escaneo(db, sesion.id, punto)
-
     return response
