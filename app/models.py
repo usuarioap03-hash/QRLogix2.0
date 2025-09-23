@@ -9,14 +9,14 @@ from app.utils.timezone import ahora_panama
 class Camion(Base):
     __tablename__ = "camiones"
     id = Column(Integer, primary_key=True, index=True)
-    placa = Column(String(20), unique=True, index=True, nullable=False)
-    device_cookie = Column(String, nullable=True, unique=True)  # Identificador único por cookie
+    device_cookie = Column(String, nullable=True, unique=True)  # Solo cookie
     sesiones = relationship("Sesion", back_populates="camion", cascade="all, delete-orphan")
 
 class Sesion(Base):
     __tablename__ = "sesiones"
     id = Column(Integer, primary_key=True, index=True)
     camion_id = Column(Integer, ForeignKey("camiones.id", ondelete="CASCADE"))
+    placa = Column(String(20), nullable=False)  # Placa va aquí
     inicio = Column(DateTime(timezone=True), default=ahora_panama, nullable=False)
 
     @staticmethod
@@ -25,6 +25,7 @@ class Sesion(Base):
 
     fin = Column(DateTime(timezone=True), default=default_fin, nullable=False)
     cerrada = Column(Boolean, default=False)
+
     camion = relationship("Camion", back_populates="sesiones")
     ciclos = relationship("Ciclo", back_populates="sesion", cascade="all, delete-orphan")
 

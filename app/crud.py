@@ -4,22 +4,19 @@ from app import models
 from app.utils.timezone import ahora_panama
 
 # Crear camion
-def create_camion(db: Session, placa: str, device_cookie: str):
-    camion = models.Camion(placa=placa, device_cookie=device_cookie)
+def create_camion(db: Session, device_cookie: str):
+    camion = models.Camion(device_cookie=device_cookie)
     db.add(camion)
     db.commit()
     db.refresh(camion)
     return camion
 
-def get_camion_by_placa(db: Session, placa: str):
-    return db.query(models.Camion).filter(models.Camion.placa == placa).first()
-
 def get_camion_by_cookie(db: Session, cookie: str):
     return db.query(models.Camion).filter(models.Camion.device_cookie == cookie).first()
 
 # Sesiones
-def create_sesion(db: Session, camion_id: int):
-    sesion = models.Sesion(camion_id=camion_id)
+def create_sesion(db: Session, camion_id: int, placa: str):
+    sesion = models.Sesion(camion_id=camion_id, placa=placa)
     db.add(sesion)
     db.commit()
     db.refresh(sesion)

@@ -12,7 +12,7 @@ router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
 COOKIE_NAME = "device_id"
-COOKIE_MAX_AGE = 365 * 24 * 60 * 60
+COOKIE_MAX_AGE = 365 * 24 * 60 * 60  # 1 año
 
 def ensure_device_cookie(request: Request, response) -> str:
     device_id = request.cookies.get(COOKIE_NAME)
@@ -63,7 +63,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
     return templates.TemplateResponse("confirmacion.html", {
         "request": request,
         "punto": punto,
-        "placa": camion.placa,
+        "placa": sesion.placa,  # ahora viene de Sesion
         "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%-I:%M:%S %p"),
         "puntos": puntos_list,
         "estados": estados,
@@ -77,11 +77,11 @@ async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db:
 
     camion = crud.get_camion_by_cookie(db, device_id)
     if not camion:
-        camion = crud.create_camion(db, plate, device_cookie=device_id)
+        camion = crud.create_camion(db, device_cookie=device_id)
 
     sesion = crud.get_sesion_activa(db, camion.id)
     if not sesion:
-        sesion = crud.create_sesion(db, camion.id)
+        sesion = crud.create_sesion(db, camion.id, plate)
 
     ciclo = crud.get_ciclo_activo(db, sesion.id)
     if not ciclo:
