@@ -57,15 +57,30 @@
 <body>
     <header>
         <!-- Logo de la empresa -->
-        <img src="/static/imagenes/ARG_logo_ver_color_no_background.png" alt="Logo Empresa">
+        <img 
+            src="/static/imagenes/ARG_logo_ver_color_no_background.png" 
+            alt="Logo Empresa">
     </header>
     <h1>Bienvenido, por favor ingrese el número de placa de su vehículo.</h1>
     <!-- Cambiamos el action a /scan/{{ punto }} -->
-    <form action="/scan/{{ punto }}" method="post">
+    <form 
+        action="/scan/{{ punto }}" 
+        method="post">
         <!-- Campo oculto con el punto escaneado -->
-        <input type="hidden" name="punto" value="{{ punto }}">
+        <input 
+            type="hidden" 
+            name="punto" 
+            value="{{ punto }}">
 
-        <input type="text" name="plate" placeholder="Ej: EH1234" required autocomplete="off" {% if submitted %}disabled{% endif %}>
+        <input 
+            type="text" 
+            name="plate" 
+            placeholder="Ej: EH1234" 
+            required autocomplete="off" 
+            maxlength="6" 
+            pattern="[A-Z0-9]{1,6}" 
+            style="text-transform:uppercase">
+
         <button type="submit" {% if submitted %}disabled{% endif %}>Registrar</button>
     </form>
     {% if message %}
