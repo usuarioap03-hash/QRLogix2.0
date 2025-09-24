@@ -79,7 +79,8 @@
             required autocomplete="off" 
             maxlength="6" 
             pattern="[A-Z0-9]{1,6}" 
-            style="text-transform:uppercase">
+            style="text-transform:uppercase"
+            oninput="this.value = this.value.toUpperCase()">
 
         <button type="submit" {% if submitted %}disabled{% endif %}>Registrar</button>
     </form>

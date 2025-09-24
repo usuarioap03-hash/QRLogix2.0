@@ -75,6 +75,9 @@ async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db:
     response = RedirectResponse(url=f"/scan/{punto}?placa={plate}", status_code=303)
     device_id = ensure_device_cookie(request, response)
 
+    # convertir la placa a mayúsculas
+    plate = plate.upper()
+
     camion = crud.get_camion_by_cookie(db, device_id)
     if not camion:
         camion = crud.create_camion(db, device_cookie=device_id)
