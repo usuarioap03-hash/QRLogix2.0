@@ -25,7 +25,7 @@
 
         header img { 
             max-width: 120px; 
-            margin-bottom: 15px; 
+            margin-bottom: 40px; 
         }
 
         .timeline {
@@ -74,9 +74,16 @@
         .placa { 
             font-size: 1rem; 
             font-weight: bold; 
-            color: #0033FF; 
+            color: #2600ff; 
             display: block; 
             margin-top: 5px; 
+        }
+         .vial { 
+            font-size: 1rem; 
+            font-weight: bold; 
+            color: #C4D600; 
+            display: block; 
+            margin: 30px 0 30px 0; 
         }
 
         @media (max-width: 480px) {
@@ -91,6 +98,11 @@
         <header>
             <img src="/static/imagenes/ARG_logo_ver_color_no_background.png" alt="Logo Empresa">
         </header>
+        
+        <div class="mensaje">
+            El {{ punto }} se ha escaneado correctamente.       
+        </div>
+
 
         <div class="timeline">
             {% for punto in puntos %}
@@ -106,10 +118,8 @@
             {% endfor %}
         </div>
 
-        <div class="mensaje">
-            El {{ punto }} se ha escaneado correctamente. <br><br>
-            SOMOS LUZ VERDE
-        </div>
+
+        <span class="vial">SOMOS LUZ VERDE EN LAS VÍAS.</span>
         <span class="placa">Placa: {{ placa }}</span>
         <span class="placa">Hora: {{ hora }}</span>
     </div>

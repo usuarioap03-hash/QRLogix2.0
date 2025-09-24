@@ -46,7 +46,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
     escaneo = crud.create_escaneo(db, ciclo.id, punto)
 
     estados = {}
-    puntos_list = ["punto1", "punto2", "punto3", "punto4"]
+    puntos_list = ["punto1", "punto2", "punto3", "punto4", "Punto5", "punto6", "punto7"]
     for idx, p in enumerate(puntos_list, start=1):
         if any(e.punto == p for e in ciclo.escaneos):
             estados[p] = "completed"
@@ -55,7 +55,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
         else:
             estados[p] = "pending"
 
-    if punto == "punto4":
+    if punto == "punto7":
         ciclo.fin = ahora_panama()
         ciclo.completado = True
         db.commit()
@@ -67,7 +67,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
         "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%-I:%M:%S %p"),
         "puntos": puntos_list,
         "estados": estados,
-        "nombres": {"punto1": "Ingreso", "punto2": "Espera", "punto3": "Carga", "punto4": "Salida"}
+        "nombres": {"punto2": "Patio", "punto3": "Espera", "punto4": "Carga", "punto5": "Cargado", "punto6": "Asegurar", "punto7": "Salida"},
     })
 
 @router.post("/scan/{punto}", response_class=HTMLResponse)
