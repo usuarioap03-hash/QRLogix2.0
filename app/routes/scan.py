@@ -55,7 +55,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
         else:
             estados[p] = "pending"
 
-    if punto == "punto4"":
+    if punto == "punto4":
         ciclo.fin = ahora_panama()
         ciclo.completado = True
         db.commit()
