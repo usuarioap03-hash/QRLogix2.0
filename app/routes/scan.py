@@ -67,7 +67,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
         "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%-I:%M:%S %p"),
         "puntos": puntos_list,
         "estados": estados,
-        "nombres": {"punto2": "En Espera", "Punto3": "Inicio de Carga", "punto4": "Salida"},
+        "nombres": {"punto2": "En Espera", "Punto3": "Carga", "punto4": "Salida"},
     })
 
 @router.post("/scan/{punto}", response_class=HTMLResponse)
