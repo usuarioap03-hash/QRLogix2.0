@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Zona no autorizada</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Roboto", Arial, sans-serif;
+      background: linear-gradient(135deg, #F1F4F8, #FFFFFF);
+      color: #071D49;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      min-height: 100vh;
+    }
+
+    header {
+      width: 100%;
+      text-align: center;
+      padding: 1rem 0;
+      background: #C4D600; /* verde Argos como cabecera */
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    header img {
+      max-height: 80px;
+    }
+
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      max-width: 90%;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .icon {
+      font-size: 2rem;
+      color: #D62828;
+    }
+
+    .msg {
+      font-size: 1.3rem;
+      line-height: 1.5;
+      color: #071D49;
+      margin-bottom: 2rem;
+    }
+
+    .msg strong {
+      color: #D62828;
+    }
+
+    .btn {
+      background-color: #071D49;
+      color: #FFFFFF;
+      padding: 0.8rem 1.8rem;
+      border: none;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #3a4355;
+    }
+
+    .footer {
+      margin: 2rem 0;
+      font-size: 0.9rem;
+      color: #5a5a5a;
+    }
+
+    h2{
+      margin: 1rem;
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="/app/static/imagenes/ARG_logo_ver_color_no_background.png" alt="Logo Argos">
+  </header>
+
+
+  <div class="container">
+    <div class="icon">🚫</div>
+    <div class="msg">
+      <h2><strong>¡Acceso denegado!</strong></h2>
+      Estás <strong>fuera del área autorizada</strong> para registrar este punto.<br>
+      Acércate a la zona de carga antes de escanear el QR.
+    </div>
+    <a class="btn" href="/">Volver</a>
+  </div>
+
+  <div class="footer">
+    Argos Panamá
+  </div>
+
+</body>
+</html>

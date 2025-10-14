@@ -3,13 +3,17 @@
 import os
 import pytz
 
+PLANTA_LAT = 9.25831;
+PLANTA_LON = -79.65848;
+RANGO_METROS = 300;
+
 # ⚙️ Configuración general para la aplicación en Render
 
 # URL de conexión a la base de datos (Render la inyecta como variable de entorno)
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Duración de las sesiones en minutos (por defecto 60 si no está configurada)
-SESSION_DURATION_MINUTES = int(os.getenv("SESSION_DURATION_MINUTES", 60))
+SESSION_DURATION_MINUTES = int(os.getenv("SESSION_DURATION_MINUTES", 900))
 
 # Nombre de la aplicación
 APP_NAME = os.getenv("APP_NAME", "QRLogix")

@@ -3,69 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QRLogix-ARGOS</title>
+    <title>QRLogix ARGOS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            background-color: #fff;
-            color: #071D49;
-            font-family: Arial, sans-serif;
-            text-align: center;
+        html, body {
+            height: 100%;
             margin: 0;
-            padding: 25px;
+            background-color: #C4D600;
+            font-family: 'Montserrat', sans-serif;
+            color: #071D49;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            text-align: center;
+        }
+        body {
+            padding: 0 20px;
+        }
+        header {
+            margin-bottom: 1rem;
         }
         header img {
-            max-width: 150px;
-            margin-top: 10px;
+            max-width: 80px;
         }
         h1 {
-            font-size: 1.4rem;
-            margin-top: 20px;
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin: 0;
+            margin-bottom: 0.3rem;
+            line-height: 1.1;
         }
-        span {
-            color: #e20000;
+        h2 {
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin: 0 0 2rem 0;
         }
         form {
-            margin-top: 20px;
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         input[type="text"] {
-            padding: 10px;
-            font-size: 1.2rem;
-            width: 80%;
-            max-width: 300px;
-            border: 2px solid #071D49;
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 1.4rem;
+            border: none;
             border-radius: 8px;
             text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1.5rem;
+            box-sizing: border-box;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            box-shadow: 0 0 6px rgba(7,29,73,0.6);
         }
         button {
+            width: 100%;
             background-color: #071D49;
             color: #fff;
-            font-size: 1.1rem;
-            padding: 10px 20px;
-            margin-top: 30px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            padding: 14px 0;
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
+            user-select: none;
         }
-        button:disabled, input:disabled {
+        button:hover:not(:disabled) {
+            background-color: #3a4a7a;
+        }
+        button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
         .mensaje {
-            margin-top: 50px;
-            font-weight: bold;
+            margin-top: 2rem;
+            font-weight: 700;
             font-size: 1.2rem;
+            color: #071D49;
         }
+        .footer {
+            margin: 2rem 0;
+            font-size: 0.9rem;
+            color: #5a5a5a;
+            }
+        
+        @media (max-height: 500px) {
+            h1 {
+                font-size: 2rem;
+            }
+            h2 {
+                font-size: 1rem;
+            }
+            input[type="text"] {
+                font-size: 1.1rem;
+                padding: 12px 14px;
+            }
+            button {
+                font-size: 1rem;
+                padding: 12px 0;
+            }
+        }
+
+        span {
+            font-size: 1rem;
+            color: red;
+        }
+
     </style>
 </head>
 <body>
     <header>
-        <!-- Logo de la empresa -->
-        <img 
-            src="/static/imagenes/ARG_logo_ver_color_no_background.png" 
-            alt="Logo Empresa">
+        <img src="/app/static/imagenes/ARG_logo_ver_color_no_background.png" alt="Logo Argos">
     </header>
-    <h1>Bienvenido, por favor ingrese el número de placa de su vehículo.</h1>
-    <!-- Cambiamos el action a /scan/{{ punto }} -->
+    <h1>AMIGO CONDUCTOR</h1>
+    <h2>REGISTRE SU LLEGADA</h2>
+
+    <script>
+    const PLANTA_LAT = 9.25831;
+    const PLANTA_LON = -79.65848;
+    const RANGO_METROS = 300;
+
+    // Calcular distancia en metros entre 2 coordenadas
+    function distanciaMetros(lat1, lon1, lat2, lon2) {
+        const R = 6371e3; // radio tierra (m)
+        const φ1 = lat1 * Math.PI / 180;
+        const φ2 = lat2 * Math.PI / 180;
+        const Δφ = (lat2 - lat1) * Math.PI / 180;
+        const Δλ = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    // Obtener ubicación y validar
+    // navigator.geolocation.getCurrentPosition(success => {
+        const lat = success.coords.latitude;
+        const lon = success.coords.longitude;
+        const dist = distanciaMetros(lat, lon, PLANTA_LAT, PLANTA_LON);
+
+        if (dist > RANGO_METROS) {
+            window.location.href = "/fuera_zona";
+        }
+    //}, error => {
+        alert("No se pudo obtener la ubicación. Activa el GPS y vuelve a intentar.");
+    //});
+    </script>
+
     <form 
         action="/scan/{{ punto }}" 
         method="post">
@@ -82,7 +173,6 @@
             required autocomplete="off" 
             maxlength="6" 
             pattern="[A-Z0-9]{1,6}" 
-            style="text-transform:uppercase"
             oninput="this.value = this.value.toUpperCase()">
 
         <button type="submit" {% if submitted %}disabled{% endif %}>Registrar</button>
@@ -90,6 +180,11 @@
     {% if message %}
     <div class="mensaje">{{ message }}</div>
     {% endif %}
-    <h3><span>⚠️Si no eres conductor de ensacado, por favor ignora este QR.</span></h3>
+
+    <h3><span>Si no eres conductor de ensacado, porfavor ignorar este QR.</span></h3>
+
+    <footer>
+        Planta Argos Panamá
+    </footer>
 </body>
 </html>

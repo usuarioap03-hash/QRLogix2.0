@@ -7,6 +7,7 @@ from app.database import get_db
 from app import crud
 from app.utils.timezone import convertir_a_panama, ahora_panama
 import uuid
+import random
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -60,6 +61,22 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
         ciclo.completado = True
         db.commit()
 
+    # 🟢 Mensajes dinámicos (recordatorios o mensajes generales)
+    modo = "recordatorio"  # Cambiar a "mensaje" cuando se deseen mensajes fijos
+
+    recordatorios = [
+        {"titulo": "Verifica tus sellos", "texto": "Asegúrate de sellar correctamente antes de salir de planta."},
+        {"titulo": "Equipo de protección", "texto": "Usa siempre casco, chaleco y botas dentro de la planta."},
+        {"titulo": "Carga asegurada", "texto": "Confirma que las correas estén tensadas antes de partir."}
+    ]
+
+    mensaje = {"titulo": "Recuerda", "texto": "Mantén tus documentos y permisos actualizados."}
+
+    if modo == "recordatorio":
+        seleccionado = random.choice(recordatorios)
+    else:
+        seleccionado = mensaje
+
     return templates.TemplateResponse("confirmacion.html", {
         "request": request,
         "punto": punto,
@@ -68,10 +85,14 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
         "puntos": puntos_list,
         "estados": estados,
         "nombres": {"punto2": "En Espera", "Punto3": "Carga", "punto4": "Salida"},
+        "modo": modo,
+        "mensaje_titulo": seleccionado["titulo"],
+        "mensaje_texto": seleccionado["texto"],
     })
 
 @router.post("/scan/{punto}", response_class=HTMLResponse)
 async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db: Session = Depends(get_db)):
+
     response = RedirectResponse(url=f"/scan/{punto}?placa={plate}", status_code=303)
     device_id = ensure_device_cookie(request, response)
 
@@ -92,3 +113,8 @@ async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db:
 
     crud.create_escaneo(db, ciclo.id, punto)
     return response
+
+# app/routes/scan.py
+@router.get("/fuera_zona", response_class=HTMLResponse)
+async def fuera_zona(request: Request):
+    return templates.TemplateResponse("geozona.html", {"request": request})
