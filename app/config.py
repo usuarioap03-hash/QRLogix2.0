@@ -3,14 +3,6 @@
 import os
 import pytz
 
-# PLANTA_LAT = 9.25831;
-# PLANTA_LON = -79.65848;
-# RANGO_METROS = 300;
-
-PLANTA_LAT = 9.028398007355186;
-PLANTA_LON = -79.46020053317156;
-RANGO_METROS = 300;
-
 # ⚙️ Configuración general para la aplicación en Render
 
 # URL de conexión a la base de datos (Render la inyecta como variable de entorno)

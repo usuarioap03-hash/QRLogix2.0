@@ -205,7 +205,7 @@
         <div class="timeline">
             {% for punto in puntos %}
                 <div class="circle {{ estados.get(punto, 'pending') }}">
-                    {% if estados.get(punto) == 'completed' %}OK
+                    {% if estados.get(punto) == 'completed' %}✓
                     {% elif estados.get(punto) == 'skipped' %}!
                     {% else %}{{ loop.index }}{% endif %}
                     <span class="label">{{ nombres.get(punto, 'Punto ' ~ loop.index) }}</span>
