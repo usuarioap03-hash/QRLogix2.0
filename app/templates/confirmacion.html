@@ -203,18 +203,18 @@
         </div>
 
         <div class="timeline">
-            <!-- {% for punto in puntos %} -->
+            {% for punto in puntos %}
                 <div class="circle {{ estados.get(punto, 'pending') }}">
-                    <!-- {% if estados.get(punto) == 'completed' %}OK
+                    {% if estados.get(punto) == 'completed' %}OK
                     {% elif estados.get(punto) == 'skipped' %}!
-                    {% else %}{{ loop.index }}{% endif %} -->
-                    <!-- <span class="label">{{ nombres.get(punto, 'Punto ' ~ loop.index) }}</span> -->
+                    {% else %}{{ loop.index }}{% endif %}
+                    <span class="label">{{ nombres.get(punto, 'Punto ' ~ loop.index) }}</span>
                      <span class="label">Patio</span>
                 </div>
-                <!-- {% if not loop.last %}
+                {% if not loop.last %}
                     <div class="line"></div>
                 {% endif %}
-            {% endfor %} -->
+            {% endfor %}
         </div>
 
         <div class="mensaje-container" id="mensajeContainer">
