@@ -198,8 +198,8 @@
         </div>
 
         <div class="escan">
-            <span class="placa">Placa: HE2345</span>
-            <span class="placa">Hora: 1:33 pm</span>
+            <span class="placa">Placa: {{ placa }}</span>
+            <span class="placa">Hora: {{ hora }}</span>
         </div>
 
         <div class="timeline">
@@ -209,7 +209,6 @@
                     {% elif estados.get(punto) == 'skipped' %}!
                     {% else %}{{ loop.index }}{% endif %}
                     <span class="label">{{ nombres.get(punto, 'Punto ' ~ loop.index) }}</span>
-                     <span class="label">Patio</span>
                 </div>
                 {% if not loop.last %}
                     <div class="line"></div>
