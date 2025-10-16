@@ -28,6 +28,6 @@ app.add_middleware(
 app.include_router(scan.router)
 
 # Healthcheck (para Render y monitoreo)
-@app.get("/health")
+@app.get("/healthcheck")
 def healthcheck():
     return {"status": "ok", "service": "QRLogix"}
