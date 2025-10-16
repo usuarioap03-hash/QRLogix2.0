@@ -12,6 +12,7 @@
             --secondary: #c4d600;
             --highlight: #115df5;
             --surface: #ffffff;
+            --danger: #d93025;
         }
 
         *,
@@ -108,18 +109,18 @@
             box-shadow: 0 0 4px rgba(7, 29, 73, 0.2);
         }
 
-        .completed {
+        .timeline .circle.completed {
             background-color: var(--primary);
             color: var(--secondary);
         }
 
-        .skipped {
-            background-color: transparent;
-            color: var(--surface);
-            border: 2px solid var(--surface);
+        .timeline .circle.skipped {
+            background-color: var(--danger);
+            color: #ffffff;
+            border: none;
         }
 
-        .pending {
+        .timeline .circle.pending {
             background-color: var(--surface);
             color: var(--primary); 
         }

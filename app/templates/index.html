@@ -127,9 +127,19 @@
     const PLANTA_LON = -79.46020053317156;
     const RANGO_METROS = 300;
 
-    // Calcular distancia en metros entre 2 coordenadas
+// Ocultar el formulario hasta validar
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.querySelector("form");
+    const mensaje = document.createElement("p");
+    mensaje.textContent = "Validando ubicación...";
+    mensaje.style.fontWeight = "700";
+    mensaje.style.marginTop = "1rem";
+    document.body.insertBefore(mensaje, form);
+    form.style.display = "none";
+
+    // Calcular distancia entre coordenadas
     function distanciaMetros(lat1, lon1, lat2, lon2) {
-        const R = 6371e3; // radio tierra (m)
+        const R = 6371e3;
         const φ1 = lat1 * Math.PI / 180;
         const φ2 = lat2 * Math.PI / 180;
         const Δφ = (lat2 - lat1) * Math.PI / 180;
@@ -139,19 +149,22 @@
         return R * c;
     }
 
-    // Obtener ubicación y validar
     navigator.geolocation.getCurrentPosition(success => {
         const lat = success.coords.latitude;
         const lon = success.coords.longitude;
         const dist = distanciaMetros(lat, lon, PLANTA_LAT, PLANTA_LON);
 
-        if (dist > RANGO_METROS) {
-            window.location.href = "/fuera_zona";
+        if (dist <= RANGO_METROS) {
+            mensaje.textContent = "Ubicación validada ✅";
+            form.style.display = "flex";
+        } else {
+            window.location.href = "/geozona.html";
         }
     }, error => {
-        alert("No se pudo obtener la ubicación. Activa el GPS y vuelve a intentar.");
+        mensaje.textContent = "No se pudo obtener la ubicación. Activa el GPS e inténtalo nuevamente.";
     });
-    </script>
+});
+</script>
 
     <form 
         action="/scan/{{ punto }}" 

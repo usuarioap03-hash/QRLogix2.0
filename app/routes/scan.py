@@ -12,7 +12,7 @@ import random
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
-COOKIE_NAME = "device_id"
+COOKIE_NAME = "device_cookie"
 COOKIE_MAX_AGE = 365 * 24 * 60 * 60  # 1 año
 
 def ensure_device_cookie(request: Request, response) -> str:
@@ -98,10 +98,10 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
         "request": request,
         "punto": punto,
         "placa": sesion.placa,  # ahora viene de Sesion
-        "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%-I:%M:%S %p"),
+        "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%-I:%M %p"),
         "puntos": puntos_list,
         "estados": estados,
-        "nombres": {"punto1": "Patio", "punto2": "Bodega", "Punto3": "Carga", "punto4": "Salida"},
+        "nombres": {"punto1": "Patio", "punto2": "Bodega", "punto3": "Carga", "punto4": "Salida"},
         "modo": modo,
         "mensaje_titulo": seleccionado["titulo"],
         "mensaje_texto": seleccionado["texto"],
@@ -136,4 +136,3 @@ async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db:
 @router.get("/geozona", response_class=HTMLResponse)
 async def fuera_zona(request: Request):
     return templates.TemplateResponse("geozona.html", {"request": request})
-
