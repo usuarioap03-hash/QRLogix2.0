@@ -72,16 +72,8 @@
             padding: 14px 0;
             border: none;
             border-radius: 8px;
-            cursor: pointer;
             transition: background-color 0.3s ease;
             user-select: none;
-        }
-        button:hover:not(:disabled) {
-            background-color: #3a4a7a;
-        }
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
         }
         .mensaje {
             margin-top: 2rem;
@@ -121,9 +113,9 @@
 </head>
 <body>
     <header>
-        <img src="/app/static/imagenes/ARG_logo_ver_color_no_background.png" alt="Logo Argos">
+        <img src="/static/imagenes/ARG_logo_ver_color_no_background.png" alt="Logo Argos">
     </header>
-    <h1>AMIGO CONDUCTOR</h1>
+    <h1>AMIGO CONDUCTOR,</h1>
     <h2>REGISTRE SU LLEGADA</h2>
 
     <script>
@@ -144,7 +136,7 @@
     }
 
     // Obtener ubicación y validar
-    // navigator.geolocation.getCurrentPosition(success => {
+    navigator.geolocation.getCurrentPosition(success => {
         const lat = success.coords.latitude;
         const lon = success.coords.longitude;
         const dist = distanciaMetros(lat, lon, PLANTA_LAT, PLANTA_LON);
@@ -152,9 +144,9 @@
         if (dist > RANGO_METROS) {
             window.location.href = "/fuera_zona";
         }
-    //}, error => {
+    }, error => {
         alert("No se pudo obtener la ubicación. Activa el GPS y vuelve a intentar.");
-    //});
+    });
     </script>
 
     <form 
@@ -183,8 +175,5 @@
 
     <h3><span>Si no eres conductor de ensacado, porfavor ignorar este QR.</span></h3>
 
-    <footer>
-        Planta Argos Panamá
-    </footer>
 </body>
 </html>

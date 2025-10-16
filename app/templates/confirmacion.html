@@ -1,175 +1,213 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QRLogix - Confirmación</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+    <title>QRLogix</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            background-color: #C4D600;
-            color: #071D49;
-            font-family: 'Montserrat', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            text-align: center;
+        :root {
+            --primary: #071d49;
+            --secondary: #c4d600;
+            --highlight: #115df5;
+            --surface: #ffffff;
         }
-        .container { 
-            width: 100%; 
-            max-width: 600px; 
-            padding: 15px; 
+
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
         }
 
-        header img { 
-            max-width: 120px; 
-            margin-bottom: 0px; 
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: clamp(16px, 4vh, 32px);
+            background-color: var(--secondary);
+            color: var(--primary);
+            font-family: 'Montserrat', sans-serif;
+            text-align: center;
+        }
+
+        .cuerpo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(12px, 4vh, 28px);
+            width: min(100%, 420px);
+        }
+
+        .logo img {
+            width: clamp(90px, 55vw, 110px);
+            height: auto;
+            display: block;
+        }
+
+        .info h1 {
+            font-size: clamp(1.5rem, 6vw, 2.3rem);
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .escan {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(4px, 1.5vh, 12px);
+        }
+
+        .placa { 
+            font-size: clamp(1rem, 4.6vw, 1.5rem);
+            font-weight: 700; 
+            color: var(--highlight); 
         }
 
         .timeline {
             display: flex;
-            justify-content: space-evenly;
             align-items: center;
+            justify-content: center;
             width: 100%;
-            margin: 20px 0;
+            gap: clamp(8px, 2vw, 18px);
         }
 
-        .timeline .circle {
-            flex: 0 0 12%;
+        .timeline .circle{
+            flex: 0 0 auto;
+            width: clamp(48px, 13vw, 72px);
             aspect-ratio: 1 / 1;
             border-radius: 50%;
-            display: flex; 
-            justify-content: center; 
+            display: flex;
+            justify-content: center;
             align-items: center;
-            font-weight: bold; 
+            font-weight: 700;
             position: relative;
-            color: #071D49;
-            background-color: #fff;
-            box-shadow: 0 0 5px rgba(0,0,0,0.15);
+            color: var(--primary);
+            background-color: var(--surface);
+            box-shadow: 0 0 6px rgba(7, 29, 73, 0.25);
         }
 
         .timeline .circle .label {
-            position: absolute; 
-            top: 110%;
-            font-size: 0.7rem; 
+            position: absolute;
+            top: 105%;
+            font-size: clamp(0.6rem, 2.6vw, 0.95rem);
             white-space: nowrap;
-            text-align: center;
-            color: #071D49;
+            color: var(--primary);
         }
 
         .timeline .line {
-            flex: 1; 
-            height: 3px; 
-            background-color: #071D49; 
-            box-shadow: 0 0 3px rgba(0,0,0,0.3);
+            flex: 1 1 clamp(16px, 10vw, 48px);
+            height: 2px;
+            background-color: var(--primary);
+            box-shadow: 0 0 4px rgba(7, 29, 73, 0.2);
         }
 
-        .completed { 
-            background-color: #071D49; 
-            color: #C4D600; 
+        .completed {
+            background-color: var(--primary);
+            color: var(--secondary);
         }
 
-        .skipped { 
-            background-color: #800000; 
-            color: #C4D600; 
+        .skipped {
+            background-color: transparent;
+            color: var(--surface);
+            border: 2px solid var(--surface);
         }
 
-        .pending { 
-            background-color: #fff; 
-            color: #071D49; 
+        .pending {
+            background-color: var(--surface);
+            color: var(--primary); 
         }
 
-        .placa { 
-            font-size: 1.1rem; 
-            font-weight: 700; 
-            color: #071D49; 
-            display: block; 
-            margin-top: 5px; 
-        }
-        
-        .vial { 
-            font-size: 1rem; 
-            font-weight: 900; 
-            color: #ffffff; 
-            display: block; 
-            padding: 20px 0 20px 0;
-            margin: 20px 0 20px 0; 
-        }
-
-        @media (max-width: 480px) {
-            .timeline .circle .label {
-                font-size: 0.6rem;
-            }
-            .mensaje, .placa, .vial {
-                font-size: 1rem;
-            }
-        }
-
-        h1{
-            font-family: 'Montserrat', sans-serif;
-            margin: 1rem;
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-        h2 {
-            font-family: 'Montserrat', sans-serif;
-            margin: 1rem;
-            font-size: 1.6rem;
-            font-weight: 800;
-        }
-
-
-    </style>
-    <style>
         .mensaje-container {
-            position: fixed;
-            bottom: 0;
             width: 100%;
-            height: 25%;
-            background-color: #071D49;
-            color: #C4D600;
-            border-radius: 20px 20px 0 0;
-            text-align: center;
-            padding: 15px;
-            animation: fadeBlink 1.5s ease-in-out 2;
+            padding: clamp(14px, 4vh, 22px);
+            border-radius: 16px;
+            background-color: var(--surface);
+            color: var(--primary);
+            box-shadow: 18px 18px 12px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            align-items: center;
+            gap: clamp(8px, 2vh, 18px);
+            animation: fadeBlink .3s ease-in-out 2;
         }
+
         @keyframes fadeBlink {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.4; }
         }
-        .mensaje-container h3 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-        .mensaje-container p {
-            font-size: 0.95rem;
+
+        h2 {
+            font-size: clamp(1rem, 5vw, 1.5rem);
             margin: 0;
         }
+
+        p {
+            font-size: clamp(0.5rem, 4vw, 1rem);
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .mensaje-container img {
+            width: clamp(60px, 45vw, 100px);
+            height: auto;
+        }
+
+        @media (max-width: 360px) {
+            .timeline {
+                gap: clamp(6px, 3vw, 12px);
+            }
+
+            .timeline .circle {
+                width: clamp(44px, 16vw, 60px);
+            }
+        }
+
+        @media (max-height: 600px) {
+            body {
+                padding: clamp(12px, 3vh, 24px);
+            }
+
+            .cuerpo {
+                gap: clamp(10px, 3vh, 20px);
+            }
+
+            .mensaje-container {
+                box-shadow: 12px 12px 10px rgba(0, 0, 0, 0.18);
+            }
+        }
+
+
     </style>
+    
 </head>
 <body>
-    <div class="container">
-        <header>
-            <img src="/static/imagenes/ARG_logo_ver_color_no_background.png" alt="Logo Empresa">
-        </header>
+    <div class="cuerpo">
+        <div class="logo">
+            <img src="/appcode2.1/QRLogix2.0/app/static/imagenes/ARG_logo_hor_color_no_background.png" alt="Logo Empresa">
+        </div>
 
+        <div class="info">
+            <h1>Se ha escaneado correctamente</h1>
+        </div>
 
-        <h2 style="font-weight: 900;">Se ha escaneado correctamente</h2>
-
+        <div class="escan">
+            <span class="placa">Placa: HE2345</span>
+            <span class="placa">Hora: 1:33 pm</span>
+        </div>
 
         <div class="timeline">
             {% for punto in puntos %}
                 <div class="circle {{ estados.get(punto, 'pending') }}">
                     {% if estados.get(punto) == 'completed' %}✓
-                    {% elif estados.get(punto) == 'skipped' %}✗
+                    {% elif estados.get(punto) == 'skipped' %}!
                     {% else %}{{ loop.index }}{% endif %}
                     <span class="label">{{ nombres.get(punto, 'Punto ' ~ loop.index) }}</span>
                 </div>
@@ -179,15 +217,14 @@
             {% endfor %}
         </div>
 
+        <div class="mensaje-container" id="mensajeContainer">
+            <h2>{{ mensaje_titulo }}</h2>
+            <p>{{ mensaje_texto }}</p>
+            {% if ilustracion %}
+              <img src="{{ ilustracion }}" alt="Ilustración">
+            {% endif %}
+        </div>
 
-        <span class="vial">SOMOS LUZ VERDE EN LAS VÍAS.</span>
-        <span class="placa">Placa: {{ placa }}</span>
-        <span class="placa">Hora: {{ hora }}</span>
-    </div>
-
-    <div class="mensaje-container" id="mensajeContainer">
-        <h3>{{ mensaje_titulo }}</h3>
-        <p>{{ mensaje_texto }}</p>
     </div>
 
     <script>
@@ -196,10 +233,17 @@
       if (modo === "recordatorio") {
         mensajeContainer.style.backgroundColor = "#071D49";
         mensajeContainer.style.color = "#C4D600";
+        mensajeContainer.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.3)";
+        mensajeContainer.style.borderRadius = "20px";
+        mensajeContainer.style.padding = "20px";
       } else {
         mensajeContainer.style.backgroundColor = "#FFFFFF";
         mensajeContainer.style.color = "#071D49";
+        mensajeContainer.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.3)";
+        mensajeContainer.style.borderRadius = "20px";
+        mensajeContainer.style.padding = "20px";
       }
     </script>
+
 </body>
 </html>

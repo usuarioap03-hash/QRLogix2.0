@@ -65,12 +65,29 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
     modo = "recordatorio"  # Cambiar a "mensaje" cuando se deseen mensajes fijos
 
     recordatorios = [
-        {"titulo": "Verifica tus sellos", "texto": "Asegúrate de sellar correctamente antes de salir de planta."},
-        {"titulo": "Equipo de protección", "texto": "Usa siempre casco, chaleco y botas dentro de la planta."},
-        {"titulo": "Carga asegurada", "texto": "Confirma que las correas estén tensadas antes de partir."}
+        {"titulo": "Cinturón de Seguridad", 
+         "texto": "Es obligatorio usarlo en todo momento.",
+         "imagen": "/static/mensaje/M_1.png"},
+
+        {"titulo": "Usar el EPP", 
+         "texto": "Al circular por las áreas operativas.",
+         "imagen": "/static/mensaje/M_3.png"},
+
+        {"titulo": "CheckList", 
+         "texto": "Asegúrate de realizar siempre la inspección preoperativa.",
+         "imagen": "/static/mensaje/M_2.png"},
+
+         {"titulo": "Inspección Técnica Vehicular", 
+         "texto": "Asegúrate que el vehículo cuente con el ITV al día.",
+         "imagen": "/static/mensaje/M_2.png"},
+
+        {"titulo": "¡PROHIBIDO!", 
+         "texto": "Transportar pasajeros.",
+         "imagen": "/static/mensaje/M_4.png"},
     ]
 
-    mensaje = {"titulo": "Recuerda", "texto": "Mantén tus documentos y permisos actualizados."}
+    mensaje = {"titulo": "Recuerda", 
+               "texto": "Mantén tus documentos y permisos actualizados."}
 
     if modo == "recordatorio":
         seleccionado = random.choice(recordatorios)
@@ -88,6 +105,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
         "modo": modo,
         "mensaje_titulo": seleccionado["titulo"],
         "mensaje_texto": seleccionado["texto"],
+        "ilustracion": seleccionado["imagen"],
     })
 
 @router.post("/scan/{punto}", response_class=HTMLResponse)
@@ -115,6 +133,7 @@ async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db:
     return response
 
 # app/routes/scan.py
-@router.get("/fuera_zona", response_class=HTMLResponse)
+@router.get("/geozona", response_class=HTMLResponse)
 async def fuera_zona(request: Request):
     return templates.TemplateResponse("geozona.html", {"request": request})
+
