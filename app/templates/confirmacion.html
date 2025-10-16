@@ -62,7 +62,6 @@
         .escan {
             display: flex;
             flex-direction: column;
-            gap: clamp(4px, 1.5vh, 12px);
         }
 
         .placa { 
@@ -191,7 +190,7 @@
 <body>
     <div class="cuerpo">
         <div class="logo">
-            <img src="/appcode2.1/QRLogix2.0/app/static/imagenes/ARG_logo_hor_color_no_background.png" alt="Logo Empresa">
+            <img src="/static/imagenes/ARG_logo_hor_color_no_background.png" alt="Logo Empresa">
         </div>
 
         <div class="info">
@@ -220,9 +219,7 @@
         <div class="mensaje-container" id="mensajeContainer">
             <h2>{{ mensaje_titulo }}</h2>
             <p>{{ mensaje_texto }}</p>
-            {% if ilustracion %}
               <img src="{{ ilustracion }}" alt="Ilustración">
-            {% endif %}
         </div>
 
     </div>

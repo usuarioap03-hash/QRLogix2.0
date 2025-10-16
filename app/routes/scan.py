@@ -67,23 +67,23 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
     recordatorios = [
         {"titulo": "Cinturón de Seguridad", 
          "texto": "Es obligatorio usarlo en todo momento.",
-         "imagen": "/static/mensaje/M_1.png"},
+         "imagen": "/static/mensaje/M_1.webp"},
 
         {"titulo": "Usar el EPP", 
          "texto": "Al circular por las áreas operativas.",
-         "imagen": "/static/mensaje/M_3.png"},
+         "imagen": "/static/mensaje/M_3.jpg"},
 
         {"titulo": "CheckList", 
          "texto": "Asegúrate de realizar siempre la inspección preoperativa.",
-         "imagen": "/static/mensaje/M_2.png"},
+         "imagen": "/static/mensaje/M_2.webp"},
 
          {"titulo": "Inspección Técnica Vehicular", 
          "texto": "Asegúrate que el vehículo cuente con el ITV al día.",
-         "imagen": "/static/mensaje/M_2.png"},
+         "imagen": "/static/mensaje/M_2.webp"},
 
         {"titulo": "¡PROHIBIDO!", 
          "texto": "Transportar pasajeros.",
-         "imagen": "/static/mensaje/M_4.png"},
+         "imagen": "/static/mensaje/M_4.webp"},
     ]
 
     mensaje = {"titulo": "Recuerda", 
