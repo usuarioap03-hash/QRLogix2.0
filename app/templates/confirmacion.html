@@ -80,7 +80,7 @@
 
         .timeline .circle{
             flex: 0 0 auto;
-            width: clamp(48px, 13vw, 72px);
+            width: clamp(30px, 13vw, 50px);
             aspect-ratio: 1 / 1;
             border-radius: 50%;
             display: flex;
@@ -96,7 +96,7 @@
         .timeline .circle .label {
             position: absolute;
             top: 105%;
-            font-size: clamp(0.6rem, 2.6vw, 0.95rem);
+            font-size: clamp(1rem, 2.6vw, 1.2rem);
             white-space: nowrap;
             color: var(--primary);
         }
@@ -203,17 +203,18 @@
         </div>
 
         <div class="timeline">
-            {% for punto in puntos %}
+            <!-- {% for punto in puntos %} -->
                 <div class="circle {{ estados.get(punto, 'pending') }}">
-                    {% if estados.get(punto) == 'completed' %}✓
+                    <!-- {% if estados.get(punto) == 'completed' %}OK
                     {% elif estados.get(punto) == 'skipped' %}!
-                    {% else %}{{ loop.index }}{% endif %}
-                    <span class="label">{{ nombres.get(punto, 'Punto ' ~ loop.index) }}</span>
+                    {% else %}{{ loop.index }}{% endif %} -->
+                    <!-- <span class="label">{{ nombres.get(punto, 'Punto ' ~ loop.index) }}</span> -->
+                     <span class="label">Patio</span>
                 </div>
-                {% if not loop.last %}
+                <!-- {% if not loop.last %}
                     <div class="line"></div>
                 {% endif %}
-            {% endfor %}
+            {% endfor %} -->
         </div>
 
         <div class="mensaje-container" id="mensajeContainer">

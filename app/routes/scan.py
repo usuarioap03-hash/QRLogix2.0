@@ -66,23 +66,23 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
 
     recordatorios = [
         {"titulo": "Cinturón de Seguridad", 
-         "texto": "Es obligatorio usarlo en todo momento.",
+         "texto": "- Es obligatorio usarlo en todo momento.",
          "imagen": "/static/mensaje/M_1.webp"},
 
         {"titulo": "Usar el EPP", 
-         "texto": "Al circular por las áreas operativas.",
+         "texto": "- Al circular por las áreas operativas.",
          "imagen": "/static/mensaje/M_3.jpg"},
 
         {"titulo": "CheckList", 
-         "texto": "Asegúrate de realizar siempre la inspección preoperativa.",
+         "texto": "- Asegúrate de realizar siempre la inspección preoperativa.",
          "imagen": "/static/mensaje/M_2.webp"},
 
          {"titulo": "Inspección Técnica Vehicular", 
-         "texto": "Asegúrate que el vehículo cuente con el ITV al día.",
+         "texto": "- Asegúrate que el vehículo cuente con el ITV al día.",
          "imagen": "/static/mensaje/M_2.webp"},
 
         {"titulo": "¡PROHIBIDO!", 
-         "texto": "Transportar pasajeros.",
+         "texto": "- Transportar pasajeros.",
          "imagen": "/static/mensaje/M_4.webp"},
     ]
 
@@ -101,7 +101,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
         "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%-I:%M:%S %p"),
         "puntos": puntos_list,
         "estados": estados,
-        "nombres": {"punto2": "En Espera", "Punto3": "Carga", "punto4": "Salida"},
+        "nombres": {"punto1": "Patio", "punto2": "Bodega", "Punto3": "Carga", "punto4": "Salida"},
         "modo": modo,
         "mensaje_titulo": seleccionado["titulo"],
         "mensaje_texto": seleccionado["texto"],
