@@ -132,7 +132,8 @@ async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db:
     crud.create_escaneo(db, ciclo.id, punto)
     return response
 
-# app/routes/scan.py
+
+# Ruta para mostrar la página de geozona
 @router.get("/geozona", response_class=HTMLResponse)
-async def fuera_zona(request: Request):
+async def mostrar_geozona(request: Request):
     return templates.TemplateResponse("geozona.html", {"request": request})
