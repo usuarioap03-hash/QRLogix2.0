@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import scan
+from fastapi import Request
 
 # Crear la app FastAPI con metadata
 app = FastAPI(
@@ -27,7 +28,7 @@ app.add_middleware(
 # Incluir las rutas de escaneo
 app.include_router(scan.router)
 
-# Healthcheck (para Render y monitoreo)
-@app.get("/health")
-def healthcheck():
+# Healthcheck (para Render y UptimeRobot)
+@app.api_route("/health", methods=["GET", "HEAD"])
+async def healthcheck(request: Request):
     return {"status": "ok", "service": "QRLogix"}
