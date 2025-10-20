@@ -1,112 +1,112 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Zona no autorizada</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: "Roboto", Arial, sans-serif;
-      background: linear-gradient(135deg, #F1F4F8, #FFFFFF);
-      color: #071D49;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: start;
-      min-height: 100vh;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <title>Zona no autorizada</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
 
-    header {
-      width: 100%;
-      text-align: center;
-      padding: 1rem 0;
-      background: #C4D600; /* verde Argos como cabecera */
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
+    <style>
+        :root {
+            --primary: #071d49;
+            --secondary: #c4d600;
+            --highlight: #115df5;
+            --surface: #ffffff;
+            --danger: #d93025;
+        }
+    
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
 
-    header img {
-      max-height: 80px;
-    }
+        body {
+            display: block;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 0;
+            background-color: var(--surface);
+            color: var(--primary);
+            font-family: 'Montserrat', sans-serif;
+            text-align: center;
+        }
 
-    .container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      max-width: 90%;
-      text-align: center;
-      padding: 2rem;
-    }
+        header {
+            width: 100%;
+            padding: 1rem;
+            background: var(--secondary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
 
-    .icon {
-      font-size: 2rem;
-      color: #D62828;
-    }
+        header img {
+            max-width: clamp(200px, 20vw, 200px);
+            height: auto;
+        }
 
-    .msg {
-      font-size: 1.3rem;
-      line-height: 1.5;
-      color: #071D49;
-      margin-bottom: 2rem;
-    }
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 500px;
+            padding: clamp(16px, 4vh, 32px)
+        }
 
-    .msg strong {
-      color: #D62828;
-    }
+        i {
+            font-size: clamp(64px, 15vw, 128px);
+            margin-bottom: clamp(16px, 4vh, 32px);
+            color: var(--danger);
+        }
 
-    .btn {
-      background-color: #071D49;
-      color: #FFFFFF;
-      padding: 0.8rem 1.8rem;
-      border: none;
-      border-radius: 4px;
-      text-decoration: none;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
+        .msg {
+            font-size: clamp(16px, 3vh, 24px);
+            margin-bottom: clamp(16px, 4vh, 32px);
+        }
 
-    .btn:hover {
-      background-color: #3a4355;
-    }
+        .msg strong {
+            color: var(--danger);
+        }
 
-    .footer {
-      margin: 2rem 0;
-      font-size: 0.9rem;
-      color: #5a5a5a;
-    }
+        .btn {
+            display: inline-block;
+            padding: clamp(12px, 2vh, 16px) clamp(24px, 4vw, 32px);
+            font-size: clamp(16px, 3vh, 24px);
+            color: var(--surface);
+            background-color: var(--primary);
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            font-weight: 700;
+        }
 
-    h2{
-      margin: 1rem;
-      font-size: 1.8rem;
-      font-weight: 700;
-    }
+    </style>
 
-
-  </style>
 </head>
 <body>
 
-  <header>
-    <img src="/static/imagenes/ARG_logo_hor_color_no_background.png" alt="Logo Argos">
-  </header>
-
-
-  <div class="container">
-    <div class="icon">🚫</div>
-    <div class="msg">
-      <h2><strong>¡Acceso denegado!</strong></h2>
-      Estás <strong>fuera del área autorizada</strong> para registrar este punto.<br>
-      Acércate a la zona de carga antes de escanear el QR.
+    <header>
+        <img src="ARG_logo_hor_color_no_background.png" alt="">
+    </header>
+    
+    <div class="container">
+        <div class="msg">
+                <i class="fa-solid fa-ban fa-beat-fade"></i><br>
+            <h2><strong>¡Acceso denegado!</strong></h2>
+            Estas <strong>fuera del área autorizada</strong> para registrar ese punto.
+        </div>
+        <a class="btn" href="https://www.google.com/">Volver</a>
     </div>
-    <a class="btn" href="/">Volver</a>
-  </div>
-
-  <div class="footer">
-    Argos Panamá
-  </div>
 
 </body>
 </html>
