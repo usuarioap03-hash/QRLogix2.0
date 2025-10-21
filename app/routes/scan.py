@@ -1,4 +1,3 @@
-# app/routes/scan.py
 from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -8,6 +7,7 @@ from app import crud
 from app.utils.timezone import convertir_a_panama, ahora_panama
 import uuid
 import random
+from app import config
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -34,11 +34,27 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
     camion = crud.get_camion_by_cookie(db, device_id)
 
     if not camion:
-        return templates.TemplateResponse("index.html", {"request": request, "punto": punto, "submitted": False})
+        return templates.TemplateResponse("index.html", {
+            "request": request,
+            "punto": punto,
+            "submitted": False,
+            "PLANTA_LAT": config.PLANTA_LAT,
+            "PLANTA_LON": config.PLANTA_LON,
+            "RANGO_METROS": config.RANGO_METROS,
+            "VALIDAR_GEOZONA": config.VALIDAR_GEOZONA,
+        })
 
     sesion = crud.get_sesion_activa(db, camion.id)
     if not sesion:
-        return templates.TemplateResponse("index.html", {"request": request, "punto": punto, "submitted": False})
+        return templates.TemplateResponse("index.html", {
+            "request": request,
+            "punto": punto,
+            "submitted": False,
+            "PLANTA_LAT": config.PLANTA_LAT,
+            "PLANTA_LON": config.PLANTA_LON,
+            "RANGO_METROS": config.RANGO_METROS,
+            "VALIDAR_GEOZONA": config.VALIDAR_GEOZONA,
+        })
 
     ciclo = crud.get_ciclo_activo(db, sesion.id)
     if not ciclo:

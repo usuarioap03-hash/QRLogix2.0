@@ -118,6 +118,7 @@
     <h1>AMIGO CONDUCTOR,</h1>
     <h2>REGISTRE SU LLEGADA</h2>
 
+    {% if VALIDAR_GEOZONA %}
     <script>
     const PLANTA_LAT = 9.25831;
     const PLANTA_LON = -79.65848;
@@ -165,6 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
+    {% endif %}
 
     <form 
         action="/scan/{{ punto }}" 
