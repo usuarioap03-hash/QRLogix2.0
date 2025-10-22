@@ -12,6 +12,13 @@ from app import config
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
+@router.get("/scan/{punto}", response_class=HTMLResponse)
+async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
+
+    # 🚧 Si está activado el modo mantenimiento, mostrar aviso
+    if config.MANTENIMIENTO:
+        return templates.TemplateResponse("mantenimiento.html", {"request": request})
+
 COOKIE_NAME = "device_cookie"
 COOKIE_MAX_AGE = 365 * 24 * 60 * 60  # 1 año
 

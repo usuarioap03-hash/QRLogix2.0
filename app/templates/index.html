@@ -119,24 +119,20 @@
     <h2>REGISTRE SU LLEGADA</h2>
 
     {% if VALIDAR_GEOZONA %}
-    <script>
-    const PLANTA_LAT = 9.25831;
-    const PLANTA_LON = -79.65848;
-    const RANGO_METROS = 300;
+<script>
+    const ZONA_LAT = Number('{{ ZONA_LAT }}');
+    const ZONA_LON = Number('{{ ZONA_LON }}');
+    const ZONA_METROS = Number('{{ ZONA_METROS }}');
 
-    // const PLANTA_LAT = 9.028398007355186;
-    // const PLANTA_LON = -79.46020053317156;
-    // const RANGO_METROS = 300;
-
-// Ocultar el formulario hasta validar
-document.addEventListener("DOMContentLoaded", () => {
-    const form = document.querySelector("form");
-    const mensaje = document.createElement("p");
-    mensaje.textContent = "Validando ubicación...";
-    mensaje.style.fontWeight = "700";
-    mensaje.style.marginTop = "1rem";
-    document.body.insertBefore(mensaje, form);
-    form.style.display = "none";
+    // Ocultar el formulario hasta validar
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.querySelector("form");
+        const mensaje = document.createElement("p");
+        mensaje.textContent = "Validando ubicación...";
+        mensaje.style.fontWeight = "700";
+        mensaje.style.marginTop = "1rem";
+        document.body.insertBefore(mensaje, form);
+        form.style.display = "none";
 
     // Calcular distancia entre coordenadas
     function distanciaMetros(lat1, lon1, lat2, lon2) {
@@ -166,7 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
-    {% endif %}
+{% endif %}
 
     <form 
         action="/scan/{{ punto }}" 
