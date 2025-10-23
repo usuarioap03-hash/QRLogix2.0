@@ -41,9 +41,9 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
             "request": request,
             "punto": punto,
             "submitted": False,
-            "PLANTA_LAT": config.PLANTA_LAT,
-            "PLANTA_LON": config.PLANTA_LON,
-            "RANGO_METROS": config.RANGO_METROS,
+            "ZONAA_LAT": config.ZONA_LAT,
+            "ZONA_LON": config.ZONA_LON,
+            "ZONA_METROS": config.ZONA_METROS,
             "VALIDAR_GEOZONA": config.VALIDAR_GEOZONA,
         })
 
@@ -53,9 +53,9 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
             "request": request,
             "punto": punto,
             "submitted": False,
-            "PLANTA_LAT": config.PLANTA_LAT,
-            "PLANTA_LON": config.PLANTA_LON,
-            "RANGO_METROS": config.RANGO_METROS,
+            "ZONA_LAT": config.ZONA_LAT,
+            "ZONA_LON": config.ZONA_LON,
+            "ZONA_METROS": config.ZONA_METROS,
             "VALIDAR_GEOZONA": config.VALIDAR_GEOZONA,
         })
 
