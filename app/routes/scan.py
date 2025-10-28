@@ -133,7 +133,7 @@ async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db:
 
     camion = crud.get_camion_by_cookie(db, device_id)
     if not camion:
-        camion = crud.create_camion(db, device_id=device_id)
+        camion = crud.create_camion(db, device_cookie=device_id)
 
     sesion = crud.get_sesion_activa(db, camion.id)
     if not sesion:

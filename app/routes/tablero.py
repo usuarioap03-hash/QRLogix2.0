@@ -6,6 +6,16 @@ from fastapi.responses import StreamingResponse
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
+from fastapi import APIRouter, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+
+router = APIRouter()
+templates = Jinja2Templates(directory="app/templates")
+
+@router.get("/tablero", response_class=HTMLResponse)
+async def mostrar_tablero(request: Request):
+    return templates.TemplateResponse("tablero.html", {"request": request})
 
 router = APIRouter()
 
