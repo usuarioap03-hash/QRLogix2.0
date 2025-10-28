@@ -1,9 +1,10 @@
 # app/logic/ciclos.py
 from sqlalchemy import text
+from app import models
 from app.utils.timezone import ahora_panama
 
 def eliminar_ciclo_incompleto(db, ciclo, sesion, crud):
-    db.query(crud.EscanerModel).filter(crud.EscanerModel.ciclo_id == ciclo.id).delete()
+    db.query(models.Escaneo).filter(models.Escaneo.ciclo_id == ciclo.id).delete()
     db.delete(ciclo)
     db.commit()
 

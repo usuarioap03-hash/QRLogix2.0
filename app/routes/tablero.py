@@ -2,33 +2,29 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from datetime import datetime
 import io
-from fastapi.responses import StreamingResponse
-from fastapi import APIRouter, Depends
+from fastapi.responses import StreamingResponse, HTMLResponse
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 from app.database import get_db
-from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
+
+# 🧭 Vista principal del tablero
 @router.get("/tablero", response_class=HTMLResponse)
 async def mostrar_tablero(request: Request):
     return templates.TemplateResponse("tablero.html", {"request": request})
 
-router = APIRouter()
 
+# 📊 Descarga de informes Excel
 @router.get("/descargar_informe")
-def descargar_informe(
-    fechaInicio: str,
-    fechaFin: str,
-    db: Session = Depends(get_db)
-):
+def descargar_informe(fechaInicio: str, fechaFin: str, db: Session = Depends(get_db)):
     inicio = datetime.strptime(fechaInicio, "%Y-%m-%d")
     fin = datetime.strptime(fechaFin, "%Y-%m-%d")
 
-    # 🔹 Datos simulados (puedes luego obtenerlos desde la BD con tu CRUD)
+    # 🔹 Datos simulados (luego obtendrás esto desde tu BD)
     ciclos = [
         {"placa": "HE2345", "inicio": "2025-10-25 08:00", "fin": "2025-10-25 09:30", "saltos": False, "completado": True},
         {"placa": "HE7865", "inicio": "2025-10-25 09:00", "fin": "2025-10-25 10:10", "saltos": True, "completado": True},
@@ -83,7 +79,6 @@ def descargar_informe(
             cell.font = normal_font
             cell.alignment = center_align
 
-    # 📊 Formato de título general
     ws.freeze_panes = "A2"
     ws.auto_filter.ref = "A1:F1"
 
