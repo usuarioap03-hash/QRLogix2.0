@@ -51,13 +51,30 @@
             max-width: 300px; 
             font-weight: 500;
         }
+
+        .btn {
+            display: inline-block;
+            padding: clamp(12px, 2vh, 16px) clamp(24px, 4vw, 32px);
+            font-size: clamp(16px, 3vh, 24px);
+            color: #fff;
+            background-color: #071D49;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            font-weight: 700;
+        }
+
+
     </style>
 </head>
 <body>
     <img src="/static/imagenes/ARG_logo_hor_color_no_background.png" alt="Logo Argos">
     <h1>En mantenimiento</h1>
-    <p>El sistema QRLogix está temporalmente en actualización.  
-    Por favor, intente nuevamente en unas horas.</p>
+    <p>El sistema QRLogix está temporalmente en actualización.<br><br>
+        <b>Pronto estaremos de vuelta.<b>
+    </p>
+    <a class="btn" href="https://www.google.com/">Salir</a>
 
 </body>
 </html>

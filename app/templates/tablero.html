@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablero - QRLogix</title>
+    <link rel="icon" type="image/png" href="/app/static/imagenes/ARG_logo_ver_color_green_background.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            background-color: #f4f6f9;
+            color: #071D49;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 98vh;
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        header {
+            background-color: #071D49;
+            color: white;
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            position: relative;
+        }
+
+        .filtros {
+            margin: 1rem 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .acciones-informe {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            width: 100%;
+            padding: 0 1rem;
+        }
+
+        .acciones-informe .rango-fecha {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #071D49;
+            font-weight: 600;
+        }
+
+        .acciones-informe .rango-fecha label {
+            margin-right: 0.25rem;
+        }
+
+        .acciones-informe input[type="date"] {
+            padding: 6px 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 0.9rem;
+        }
+
+        .btn-descargar i {
+            margin-right: 0.5rem;
+        }
+
+        button {
+            background-color: #C4D600;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            color: #071D49;
+        }
+
+        button:hover {
+            background-color: #b8c800;
+        }
+
+        .tablero {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            width: 100%;
+            margin-bottom: 2rem;
+            padding: 0 1rem;
+        }
+
+        .columna {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            flex: 1;
+            min-width: 250px;
+            max-width: 300px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .columna h2 {
+            text-align: center;
+            background-color: #071D49;
+            color: white;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+
+        .tarjeta {
+            background-color: #C4D600;
+            color: #071D49;
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tiempo {
+            font-weight: 400;
+            font-size: 0.85rem;
+            color: #071D49;
+            opacity: 0.7;
+            margin-left: 10px;
+        }
+
+        .header-title {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-align: center;
+        }
+
+        .header-logo {
+            margin-left: auto;
+            min-width: 120px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .header-logo img {
+            max-height: 50px;
+            width: auto;
+        }
+
+        .icon-patio {
+            color: #FF8C42;
+        }
+
+        .icon-bodega {
+            color: #01b3ff;
+        }
+
+        .icon-cargando {
+            color: #00ed37;
+        }
+
+        footer {
+            margin-top: auto;
+            background-color: #071D49;
+            color: white;
+            width: 100%;
+            text-align: center;
+            padding: 0.8rem;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-title">
+            <i class="fa-solid fa-square-poll-vertical" style="color: #c3d117;"></i>
+            Estado de Camiones
+        </div>
+        <div class="header-logo">
+            <img src="/app/static/imagenes/ARG_logo_hor_BN_no_background.png" alt="Argos Logo">
+        </div>
+    </header>
+
+    <div class="filtros">
+        <button onclick="filtrar('Todos')">Todos</button>
+        {% for tipo in tipos %}
+        <button onclick="filtrar('{{ tipo }}')">{{ tipo }}</button>
+        {% endfor %}
+    </div>
+
+    <div class="acciones-informe">
+        <div class="rango-fecha">
+            <label for="fechaInicio">Rango de fecha</label>
+            <input type="date" id="fechaInicio" name="fechaInicio" title="Fecha inicio">
+            <span>—</span>
+            <input type="date" id="fechaFin" name="fechaFin" title="Fecha fin">
+        </div>
+        <button class="btn-descargar" onclick="descargarInforme()">
+            <i class="fa-solid fa-download"></i>
+            Descargar informe
+        </button>
+    </div>
+
+    <div class="tablero" id="tablero">
+        <div class="columna" id="Patio">
+            <h2><i class="fa-solid fa-hourglass-start icon-patio"></i> Patio ({{ data | selectattr('estado', 'equalto', 'Esperando') | selectattr('ubicacion', 'equalto', 'Patio') | list | length }})</h2>
+            {% for d in data if d.estado == 'Esperando' and d.ubicacion == 'Patio' %}
+            <div class="tarjeta" data-tipo="{{ d.tipo }}">
+                <span>{{ d.placa }}</span>
+                <span class="tiempo">{{ d.tiempo_en_estado }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="columna" id="Bodega">
+            <h2><i class="fa-solid fa-hourglass-start icon-bodega"></i> Bodega ({{ data | selectattr('estado', 'equalto', 'Esperando') | selectattr('ubicacion', 'equalto', 'Bodega') | list | length }})</h2>
+            {% for d in data if d.estado == 'Esperando' and d.ubicacion == 'Bodega' %}
+            <div class="tarjeta" data-tipo="{{ d.tipo }}">
+                <span>{{ d.placa }}</span>
+                <span class="tiempo">{{ d.tiempo_en_estado }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="columna" id="Cargando">
+            <h2><i class="fa-solid fa-truck-ramp-box icon-cargando"></i> Cargando ({{ data | selectattr('estado', 'equalto', 'Cargando') | list | length }})</h2>
+            {% for d in data if d.estado == 'Cargando' %}
+            <div class="tarjeta" data-tipo="{{ d.tipo }}">
+                <span>{{ d.placa }}</span>
+                <span class="tiempo">{{ d.tiempo_en_estado }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <footer>Argos Panamá © 2025 | Sistema QRLogix</footer>
+
+    <script>
+        function filtrar(tipo) {
+            const tarjetas = document.querySelectorAll('.tarjeta');
+            tarjetas.forEach(t => {
+                if (tipo === 'Todos' || t.dataset.tipo === tipo) {
+                    t.style.display = 'flex';
+                } else {
+                    t.style.display = 'none';
+                }
+            });
+        }
+
+        function descargarInforme() {
+            const fechaInicio = document.getElementById('fechaInicio').value;
+            const fechaFin = document.getElementById('fechaFin').value;
+
+            if (!fechaInicio || !fechaFin) {
+                alert('Por favor, seleccione ambas fechas para descargar el informe.');
+                return;
+            }
+
+            if (fechaInicio > fechaFin) {
+                alert('La fecha de inicio no puede ser mayor que la fecha fin.');
+                return;
+            }
+
+            // Aquí se puede implementar la lógica para descargar el archivo .xlsx con los parámetros de fechas
+            // Por ejemplo, redirigir a una URL con query params o hacer una petición fetch para obtener el archivo.
+
+            // Ejemplo básico de redirección:
+            window.location.href = `/descargar_informe?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
+        }
+    </script>
+</body>
+</html>

@@ -3,8 +3,9 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import scan
+from app.routes import ciclos_routes, scan, tablero
 from fastapi import Request
+from app.routes import ciclos_routes
 
 # Crear la app FastAPI con metadata
 app = FastAPI(
@@ -32,3 +33,7 @@ app.include_router(scan.router)
 @app.api_route("/health", methods=["GET", "HEAD"])
 async def healthcheck(request: Request):
     return {"status": "ok", "service": "QRLogix"}
+
+app.include_router(tablero.router)
+
+app.include_router(ciclos_routes.router)
