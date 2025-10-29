@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal
-from datetime import datetime, timezone
+from datetime import timezone
 from app.database import get_db
 from app.utils.timezone import formatear_hora_panama, ahora_panama
 from fastapi.templating import Jinja2Templates
@@ -54,7 +54,7 @@ async def obtener_ciclos_abiertos(db: Session = Depends(get_db)):
         else:
             puntos_str = "-"
 
-        # 🔹 Calcular tiempo total (en minutos) desde el primer escaneo hasta ahora
+        # 🔹 Calcular tiempo total (minutos desde inicio hasta ahora)
         inicio = c.inicio_ciclo.replace(tzinfo=timezone.utc)
         delta_min = (ahora - inicio).total_seconds() / 60
         tiempo_str = f"{int(round(delta_min)):02d} min"
@@ -100,9 +100,9 @@ async def accion_manual(request: Request, db: Session = Depends(get_db)):
             DELETE FROM ciclos WHERE id = :cid;
         """), {"cid": ciclo.ciclo_id})
         db.execute(text("""
-            INSERT INTO ciclos_manual 
+            INSERT INTO ciclo_manual 
             (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
-            VALUES (:placa, NOW(), :motivo, :detalles::jsonb, :sid, :cid, :registrado_por);
+            VALUES (:placa, NOW(), :motivo, CAST(:detalles AS jsonb), :sid, :cid, :registrado_por);
         """), {
             "placa": placa,
             "motivo": motivo,
@@ -121,9 +121,9 @@ async def accion_manual(request: Request, db: Session = Depends(get_db)):
             UPDATE ciclos SET completado = TRUE, fin = NOW() WHERE id = :cid;
         """), {"cid": ciclo.ciclo_id})
         db.execute(text("""
-            INSERT INTO ciclos_manual 
+            INSERT INTO ciclo_manual 
             (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
-            VALUES (:placa, NOW(), :motivo, :detalles::jsonb, :sid, :cid, :registrado_por);
+            VALUES (:placa, NOW(), :motivo, CAST(:detalles AS jsonb), :sid, :cid, :registrado_por);
         """), {
             "placa": placa,
             "motivo": motivo,

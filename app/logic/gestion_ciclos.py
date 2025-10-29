@@ -4,16 +4,18 @@ from app import models
 from app.utils.timezone import ahora_panama, formatear_hora_panama
 
 def eliminar_ciclo_incompleto(db, ciclo, sesion, crud):
-    db.query(models.Escaneo).filter(models.Escaneo.ciclo_id == ciclo.id).delete()
+    # Eliminar escaneos relacionados sin warnings
+    db.query(models.Escaneo).filter(models.Escaneo.ciclo_id == ciclo.id).delete(synchronize_session=False)
     db.delete(ciclo)
     db.commit()
 
     hora_eliminacion = ahora_panama()
     db.execute(
-        text("INSERT INTO ciclo_manual (placa, hora_eliminacion) VALUES (:placa, :hora_eliminacion)"),
-        {"placa": sesion.placa, "hora_eliminacion": hora_eliminacion}
+        text("INSERT INTO ciclo_manual (placa, fecha_eliminacion) VALUES (:placa, :fecha_eliminacion)"),
+        {"placa": sesion.placa, "fecha_eliminacion": hora_eliminacion}
     )
     db.commit()
+
     print(f"🚫 Ciclo eliminado por omitir punto3: Placa {sesion.placa} — {formatear_hora_panama(hora_eliminacion)}")
 
 def registrar_cierre_ciclo(sesion, hora_cierre):
