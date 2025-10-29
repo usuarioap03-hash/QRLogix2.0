@@ -76,7 +76,20 @@
     .cerrar:hover { background-color: #218838; }
     .eliminar:hover { background-color: #c82333; }
 
-    /* Spinner */
+    /* 🔄 Botón de actualización */
+    .refresh {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: block;
+      margin: 0 auto 15px auto;
+    }
+    .refresh:hover { background-color: #0069d9; }
+
     .spinner {
       border: 4px solid #f3f3f3;
       border-top: 4px solid #C4D600;
@@ -96,6 +109,8 @@
 </head>
 <body>
   <h1>Gestión Manual de Ciclos</h1>
+
+  <button class="refresh" onclick="cargarCiclos()">🔄 Actualizar tabla</button>
 
   <table>
     <thead>
@@ -143,29 +158,34 @@
   </div>
 
   <script>
-    // Cargar datos de la vista de ciclos abiertos
-    document.addEventListener("DOMContentLoaded", async () => {
+    async function cargarCiclos() {
       const tabla = document.getElementById("tabla-ciclos");
+      tabla.innerHTML = `<tr><td colspan="5"><div class="spinner"></div>Actualizando...</td></tr>`;
       try {
-        const res = await fetch("/ciclos");
-        if (!res.ok) throw new Error("Error en la solicitud");
-        const html = await res.text();
-        const temp = document.createElement("div");
-        temp.innerHTML = html;
-        const filas = temp.querySelectorAll("tbody tr");
+        const res = await fetch("/api/ciclos");
+        const data = await res.json();
         tabla.innerHTML = "";
-        if (filas.length > 0) {
-          filas.forEach(f => tabla.appendChild(f));
-        } else {
+        if (data.length === 0) {
           tabla.innerHTML = `<tr><td colspan="5">No hay ciclos abiertos actualmente.</td></tr>`;
+          return;
         }
+        data.forEach(c => {
+          const fila = document.createElement("tr");
+          fila.innerHTML = `
+            <td>${c.placa}</td>
+            <td>${c.puntos_escaneados}</td>
+            <td>${c.inicio}</td>
+            <td>${c.ultimo_escaneo}</td>
+            <td>${c.minutos_transcurridos}</td>
+          `;
+          tabla.appendChild(fila);
+        });
       } catch (err) {
         console.error("Error al cargar ciclos:", err);
         tabla.innerHTML = `<tr><td colspan="5">Error al cargar los ciclos 🚫</td></tr>`;
       }
-    });
+    }
 
-    // Registrar acciones manuales
     async function accionManual(tipo) {
       const data = {
         placa: document.getElementById("placa").value.trim(),
@@ -185,11 +205,14 @@
       });
       if (res.ok) {
         alert(`Ciclo ${tipo === 'cerrar' ? 'cerrado' : 'eliminado'} correctamente ✅`);
-        location.reload();
+        cargarCiclos(); // 🔄 Refresca sin recargar la página
       } else {
         alert("Error al procesar la acción ❌");
       }
     }
+
+    // Carga inicial
+    document.addEventListener("DOMContentLoaded", cargarCiclos);
   </script>
 </body>
 </html>

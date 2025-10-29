@@ -11,12 +11,19 @@ router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
 # ======================================================
-# 🧭 VISTA PRINCIPAL DE CICLOS ABIERTOS
+# 🧭 VISTA PRINCIPAL (HTML)
 # ======================================================
 @router.get("/ciclos", response_class=HTMLResponse)
-async def mostrar_ciclos(request: Request, db: Session = Depends(get_db)):
+async def mostrar_ciclos(request: Request):
+    """Renderiza la página principal de gestión manual de ciclos."""
+    return templates.TemplateResponse("ciclos.html", {"request": request})
+
+# ======================================================
+# 📊 API JSON PARA CARGAR DATOS (usa la vista ciclos_abiertos)
+# ======================================================
+@router.get("/api/ciclos", response_class=JSONResponse)
+async def obtener_ciclos_abiertos(db: Session = Depends(get_db)):
     try:
-        # Consultar directamente la vista en PostgreSQL
         query = text("""
             SELECT 
                 placa,
@@ -30,7 +37,7 @@ async def mostrar_ciclos(request: Request, db: Session = Depends(get_db)):
         ciclos_abiertos = db.execute(query).fetchall()
     except Exception as e:
         print(f"⚠️ Error al consultar la vista ciclos_abiertos: {e}")
-        ciclos_abiertos = []
+        return JSONResponse(content=[])
 
     ciclos = []
     for c in ciclos_abiertos:
@@ -42,7 +49,7 @@ async def mostrar_ciclos(request: Request, db: Session = Depends(get_db)):
             "minutos_transcurridos": round(c.tiempo_total_min or 0, 1)
         })
 
-    return templates.TemplateResponse("ciclos.html", {"request": request, "ciclos": ciclos})
+    return JSONResponse(content=ciclos)
 
 # ======================================================
 # ⚙️ REGISTRO MANUAL (CERRAR O ELIMINAR)
@@ -68,16 +75,13 @@ async def accion_manual(request: Request, db: Session = Depends(get_db)):
     if not ciclo:
         return JSONResponse(status_code=404, content={"error": "No se encontró ciclo abierto para esa placa."})
 
-    # Lógica de acciones
     if accion == "eliminar":
-        db.execute(text("""
-            DELETE FROM escaneos WHERE ciclo_id = :cid;
-            DELETE FROM ciclos WHERE id = :cid;
-        """), {"cid": ciclo.ciclo_id})
+        db.execute(text("DELETE FROM escaneos WHERE ciclo_id = :cid"), {"cid": ciclo.ciclo_id})
+        db.execute(text("DELETE FROM ciclos WHERE id = :cid"), {"cid": ciclo.ciclo_id})
         db.execute(text("""
             INSERT INTO ciclos_manual 
             (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
-            VALUES (:placa, NOW(), :motivo, :detalles::jsonb, :sid, :cid, :registrado_por);
+            VALUES (:placa, NOW(), :motivo, :detalles::jsonb, :sid, :cid, :registrado_por)
         """), {
             "placa": placa,
             "motivo": motivo,
@@ -91,13 +95,11 @@ async def accion_manual(request: Request, db: Session = Depends(get_db)):
         return JSONResponse(content={"success": True, "msg": "Ciclo eliminado correctamente."})
 
     elif accion == "cerrar":
-        db.execute(text("""
-            UPDATE ciclos SET completado = TRUE, fin = NOW() WHERE id = :cid;
-        """), {"cid": ciclo.ciclo_id})
+        db.execute(text("UPDATE ciclos SET completado = TRUE, fin = NOW() WHERE id = :cid"), {"cid": ciclo.ciclo_id})
         db.execute(text("""
             INSERT INTO ciclos_manual 
             (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
-            VALUES (:placa, NOW(), :motivo, :detalles::jsonb, :sid, :cid, :registrado_por);
+            VALUES (:placa, NOW(), :motivo, :detalles::jsonb, :sid, :cid, :registrado_por)
         """), {
             "placa": placa,
             "motivo": motivo,
@@ -110,5 +112,4 @@ async def accion_manual(request: Request, db: Session = Depends(get_db)):
         print(f"✅ Ciclo cerrado manualmente: {placa} ({motivo}) — {registrado_por}")
         return JSONResponse(content={"success": True, "msg": "Ciclo cerrado correctamente."})
 
-    else:
-        return JSONResponse(status_code=400, content={"error": "Acción no válida."})
+    return JSONResponse(status_code=400, content={"error": "Acción no válida."})
