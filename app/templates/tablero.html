@@ -40,12 +40,6 @@
             position: relative;
         }
 
-        .filtros {
-            margin: 1rem 0;
-            display: flex;
-            gap: 10px;
-        }
-
         .acciones-informe {
             display: flex;
             align-items: center;
@@ -138,6 +132,13 @@
             align-items: center;
         }
 
+        .tarjeta--vacía {
+            background-color: #e5e9f0;
+            color: #56657b;
+            font-weight: 600;
+            justify-content: center;
+        }
+
         .tiempo {
             font-weight: 400;
             font-size: 0.85rem;
@@ -203,13 +204,6 @@
         </div>
     </header>
 
-    <div class="filtros">
-        <button onclick="filtrar('Todos')">Todos</button>
-        {% for tipo in tipos %}
-        <button onclick="filtrar('{{ tipo }}')">{{ tipo }}</button>
-        {% endfor %}
-    </div>
-
     <div class="acciones-informe">
         <div class="rango-fecha">
             <label for="fechaInicio">Rango de fecha</label>
@@ -224,33 +218,28 @@
     </div>
 
     <div class="tablero" id="tablero">
-        <div class="columna" id="Patio">
-            <h2><i class="fa-solid fa-hourglass-start icon-patio"></i> Patio ({{ data | selectattr('estado', 'equalto', 'Esperando') | selectattr('ubicacion', 'equalto', 'Patio') | list | length }})</h2>
-            {% for d in data if d.estado == 'Esperando' and d.ubicacion == 'Patio' %}
-            <div class="tarjeta" data-tipo="{{ d.tipo }}">
-                <span>{{ d.placa }}</span>
-                <span class="tiempo">{{ d.tiempo_en_estado }}</span>
-            </div>
-            {% endfor %}
+        {% set iconos = {
+            'Patio': 'fa-hourglass-start icon-patio',
+            'Bodega': 'fa-hourglass-start icon-bodega',
+            'Cargando': 'fa-truck-ramp-box icon-cargando'
+        } %}
+        {% for columna in ['Patio', 'Bodega', 'Cargando'] %}
+        <div class="columna" id="{{ columna }}">
+            <h2><i class="fa-solid {{ iconos[columna] }}"></i> {{ columna }} ({{ tablero[columna] | length }})</h2>
+            {% if tablero[columna] %}
+                {% for item in tablero[columna] %}
+                <div class="tarjeta">
+                    <span>{{ item.placa }}</span>
+                    <span class="tiempo">{{ item.hora }}</span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="tarjeta tarjeta--vacía">
+                    <span>Sin registros</span>
+                </div>
+            {% endif %}
         </div>
-        <div class="columna" id="Bodega">
-            <h2><i class="fa-solid fa-hourglass-start icon-bodega"></i> Bodega ({{ data | selectattr('estado', 'equalto', 'Esperando') | selectattr('ubicacion', 'equalto', 'Bodega') | list | length }})</h2>
-            {% for d in data if d.estado == 'Esperando' and d.ubicacion == 'Bodega' %}
-            <div class="tarjeta" data-tipo="{{ d.tipo }}">
-                <span>{{ d.placa }}</span>
-                <span class="tiempo">{{ d.tiempo_en_estado }}</span>
-            </div>
-            {% endfor %}
-        </div>
-        <div class="columna" id="Cargando">
-            <h2><i class="fa-solid fa-truck-ramp-box icon-cargando"></i> Cargando ({{ data | selectattr('estado', 'equalto', 'Cargando') | list | length }})</h2>
-            {% for d in data if d.estado == 'Cargando' %}
-            <div class="tarjeta" data-tipo="{{ d.tipo }}">
-                <span>{{ d.placa }}</span>
-                <span class="tiempo">{{ d.tiempo_en_estado }}</span>
-            </div>
-            {% endfor %}
-        </div>
+        {% endfor %}
     </div>
     <div style="text-align:center; margin-bottom: 2rem;">
         <button onclick="window.location.href='/ciclos'" style="background-color:#071D49; color:white; padding:12px 24px; border:none; border-radius:8px; font-weight:700; cursor:pointer;">
@@ -261,17 +250,6 @@
     <footer>Argos Panamá - QRLogix</footer>
 
     <script>
-        function filtrar(tipo) {
-            const tarjetas = document.querySelectorAll('.tarjeta');
-            tarjetas.forEach(t => {
-                if (tipo === 'Todos' || t.dataset.tipo === tipo) {
-                    t.style.display = 'flex';
-                } else {
-                    t.style.display = 'none';
-                }
-            });
-        }
-
         function descargarInforme() {
             const fechaInicio = document.getElementById('fechaInicio').value;
             const fechaFin = document.getElementById('fechaFin').value;

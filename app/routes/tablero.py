@@ -5,8 +5,11 @@ import io
 from fastapi.responses import StreamingResponse, HTMLResponse
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
+from sqlalchemy import func, and_
 from app.database import get_db
 from fastapi.templating import Jinja2Templates
+from app import models
+from app.utils.timezone import formatear_hora_panama
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -14,8 +17,77 @@ templates = Jinja2Templates(directory="app/templates")
 
 # 🧭 Vista principal del tablero
 @router.get("/tablero", response_class=HTMLResponse)
-async def mostrar_tablero(request: Request):
-    return templates.TemplateResponse("tablero.html", {"request": request})
+async def mostrar_tablero(request: Request, db: Session = Depends(get_db)):
+    tablero = {  # Estado → listado de placas
+        "Patio": [],
+        "Bodega": [],
+        "Cargando": [],
+    }
+
+    punto_a_estado = {
+        "punto1": "Patio",
+        "punto2": "Bodega",
+        "punto3": "Cargando",
+        "punto4": "Cargando",
+        "punto5": "Cargando",
+    }
+
+    # Subconsulta para obtener la última marca de tiempo por ciclo
+    ultimos_por_ciclo = (
+        db.query(
+            models.Escaneo.ciclo_id.label("ciclo_id"),
+            func.max(models.Escaneo.fecha_hora).label("ultima_fecha")
+        )
+        .group_by(models.Escaneo.ciclo_id)
+        .subquery()
+    )
+
+    # Último escaneo por ciclo con su punto asociado
+    ultimo_escaneo = (
+        db.query(
+            models.Escaneo.ciclo_id.label("ciclo_id"),
+            models.Escaneo.punto.label("punto"),
+            models.Escaneo.fecha_hora.label("fecha_hora")
+        )
+        .join(
+            ultimos_por_ciclo,
+            and_(
+                models.Escaneo.ciclo_id == ultimos_por_ciclo.c.ciclo_id,
+                models.Escaneo.fecha_hora == ultimos_por_ciclo.c.ultima_fecha
+            )
+        )
+        .subquery()
+    )
+
+    registros = (
+        db.query(
+            models.Sesion.placa,
+            ultimo_escaneo.c.punto,
+            ultimo_escaneo.c.fecha_hora
+        )
+        .join(models.Ciclo, models.Ciclo.sesion_id == models.Sesion.id)
+        .join(ultimo_escaneo, ultimo_escaneo.c.ciclo_id == models.Ciclo.id)
+        .filter(
+            models.Ciclo.completado == False,
+            models.Sesion.cerrada == False
+        )
+        .order_by(ultimo_escaneo.c.fecha_hora.desc())
+        .all()
+    )
+
+    for placa, punto, fecha in registros:
+        estado = punto_a_estado.get(punto)
+        if not estado:
+            continue
+        tablero[estado].append({
+            "placa": placa,
+            "hora": formatear_hora_panama(fecha),
+        })
+
+    return templates.TemplateResponse("tablero.html", {
+        "request": request,
+        "tablero": tablero,
+    })
 
 
 # 📊 Descarga de informes Excel
