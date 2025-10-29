@@ -32,13 +32,13 @@
             margin: 10px 0;
         }
         .hora {
-            font-size: 2.5rem;
+            font-size: 2rem;
             margin-bottom: 1.5rem;
             font-weight: 600;
 
         }
         .fecha {
-            font-size: 2.5rem;
+            font-size: 2rem;
             margin-bottom: 1.5rem;
             font-weight: 600;
         }
@@ -54,10 +54,10 @@
 </head>
 <body>
     <div class="contenedor">
-        <img src="/app/static/imagenes/ARG_logo_ver_BN_no_background.png" alt="Logo Argos" width="120">
+        <img src="/static/imagenes/ARG_logo_ver_BN_no_background.png" alt="Logo Argos" width="120">
         <div class="placa">Placa: {{ placa }}</div>
         <div class="hora">{{ hora }}</div>
-        <div class="fecha">{{ fecha }}</div>
+        <div class="fecha">{{ fecha_actual }}</div>
         <div class="mensaje">Salida registrada correctamente</div>
     </div>
 </body>

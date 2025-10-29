@@ -18,18 +18,15 @@ templates = Jinja2Templates(directory="app/templates")
 # ======================================================
 @router.get("/ciclos", response_class=HTMLResponse)
 async def mostrar_ciclos(request: Request):
-    try:
-        locale.setlocale(locale.LC_TIME, 'es_PA.UTF-8')
-    except:
-        locale.setlocale(locale.LC_TIME, 'es_ES')
+    meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+    dias = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
 
-    # ✅ Fecha en formato "Mié 29 oct"
-    fecha_actual = datetime.now().strftime("%a %d %b").capitalize()
+    ahora = datetime.now()
+    fecha_actual = f"{dias[ahora.weekday()]} {ahora.day} {meses[ahora.month - 1]}"
 
-    # Ya no se incluye "ciclos": ciclos, porque se cargan por fetch desde /api/ciclos
     return templates.TemplateResponse("ciclos.html", {
         "request": request,
-        "fecha_actual": fecha_actual
+        "fecha_actual": fecha_actual.capitalize()
     })
 
 # ======================================================

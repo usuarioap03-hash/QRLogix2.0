@@ -4,22 +4,37 @@ from app import models
 from app.utils.timezone import ahora_panama, formatear_hora_panama
 
 def eliminar_ciclo_incompleto(db, ciclo, sesion, crud):
-    # Eliminar escaneos relacionados sin warnings
-    db.query(models.Escaneo).filter(models.Escaneo.ciclo_id == ciclo.id).delete(synchronize_session=False)
+    # 1️⃣ Verificar si ya se registró esta eliminación
+    existe = db.execute(text("""
+        SELECT id FROM ciclo_manual
+        WHERE sesion_id = :sid OR placa = :placa
+        ORDER BY id DESC LIMIT 1;
+    """), {"sid": sesion.id, "placa": sesion.placa}).fetchone()
+
+    if existe:
+        print(f"⚠️ Eliminación ya registrada previamente para {sesion.placa}, no se repite.")
+        return  # Evita duplicar el registro
+
+    # 2️⃣ Proceder con eliminación si no existe
+    db.query(models.Escaneo).filter(models.Escaneo.ciclo_id == ciclo.id).delete()
     db.delete(ciclo)
     db.commit()
 
     hora_eliminacion = ahora_panama()
     db.execute(
-        text("INSERT INTO ciclo_manual (placa, fecha_eliminacion) VALUES (:placa, :fecha_eliminacion)"),
-        {"placa": sesion.placa, "fecha_eliminacion": hora_eliminacion}
+        text("""
+            INSERT INTO ciclo_manual (placa, fecha_eliminacion, sesion_id, ciclo_id, motivo, detalles, registrado_por)
+            VALUES (:placa, :fecha_eliminacion, :sesion_id, :ciclo_id, 'Omitió punto3', '{}', 'Sistema');
+        """),
+        {
+            "placa": sesion.placa,
+            "fecha_eliminacion": hora_eliminacion,
+            "sesion_id": sesion.id,
+            "ciclo_id": ciclo.id
+        }
     )
     db.commit()
-
     print(f"🚫 Ciclo eliminado por omitir punto3: Placa {sesion.placa} — {formatear_hora_panama(hora_eliminacion)}")
-
-def registrar_cierre_ciclo(sesion, hora_cierre):
-    print(f"✅ Ciclo completado: Placa {sesion.placa} — {formatear_hora_panama(hora_cierre)}")
 
 # =============================================
 # 🔹 NUEVAS FUNCIONES PARA GESTIÓN MANUAL DE CICLOS
