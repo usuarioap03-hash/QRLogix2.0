@@ -76,20 +76,6 @@
     .cerrar:hover { background-color: #218838; }
     .eliminar:hover { background-color: #c82333; }
 
-    /* 🔄 Botón de actualización */
-    .refresh {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 8px 16px;
-      font-weight: 600;
-      cursor: pointer;
-      display: block;
-      margin: 0 auto 15px auto;
-    }
-    .refresh:hover { background-color: #0069d9; }
-
     .spinner {
       border: 4px solid #f3f3f3;
       border-top: 4px solid #C4D600;
@@ -109,8 +95,6 @@
 </head>
 <body>
   <h1>Gestión Manual de Ciclos</h1>
-
-  <button class="refresh" onclick="cargarCiclos()">🔄 Actualizar tabla</button>
 
   <table>
     <thead>
@@ -158,9 +142,8 @@
   </div>
 
   <script>
-    async function cargarCiclos() {
+    document.addEventListener("DOMContentLoaded", async () => {
       const tabla = document.getElementById("tabla-ciclos");
-      tabla.innerHTML = `<tr><td colspan="5"><div class="spinner"></div>Actualizando...</td></tr>`;
       try {
         const res = await fetch("/api/ciclos");
         const data = await res.json();
@@ -184,7 +167,7 @@
         console.error("Error al cargar ciclos:", err);
         tabla.innerHTML = `<tr><td colspan="5">Error al cargar los ciclos 🚫</td></tr>`;
       }
-    }
+    });
 
     async function accionManual(tipo) {
       const data = {
@@ -205,14 +188,11 @@
       });
       if (res.ok) {
         alert(`Ciclo ${tipo === 'cerrar' ? 'cerrado' : 'eliminado'} correctamente ✅`);
-        cargarCiclos(); // 🔄 Refresca sin recargar la página
+        location.reload();
       } else {
         alert("Error al procesar la acción ❌");
       }
     }
-
-    // Carga inicial
-    document.addEventListener("DOMContentLoaded", cargarCiclos);
   </script>
 </body>
 </html>

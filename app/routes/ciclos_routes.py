@@ -3,6 +3,7 @@ from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
+from decimal import Decimal
 from app.database import get_db
 from app.utils.timezone import formatear_hora_panama
 from fastapi.templating import Jinja2Templates
@@ -11,17 +12,16 @@ router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
 # ======================================================
-# 🧭 VISTA PRINCIPAL (HTML)
+# 🧭 VISTA PRINCIPAL DE CICLOS ABIERTOS (HTML)
 # ======================================================
 @router.get("/ciclos", response_class=HTMLResponse)
 async def mostrar_ciclos(request: Request):
-    """Renderiza la página principal de gestión manual de ciclos."""
     return templates.TemplateResponse("ciclos.html", {"request": request})
 
 # ======================================================
-# 📊 API JSON PARA CARGAR DATOS (usa la vista ciclos_abiertos)
+# 🔹 API: Datos de la vista ciclos_abiertos
 # ======================================================
-@router.get("/api/ciclos", response_class=JSONResponse)
+@router.get("/api/ciclos")
 async def obtener_ciclos_abiertos(db: Session = Depends(get_db)):
     try:
         query = text("""
@@ -34,19 +34,23 @@ async def obtener_ciclos_abiertos(db: Session = Depends(get_db)):
             FROM ciclos_abiertos
             ORDER BY ultimo_escaneo DESC;
         """)
-        ciclos_abiertos = db.execute(query).fetchall()
+        resultados = db.execute(query).fetchall()
     except Exception as e:
         print(f"⚠️ Error al consultar la vista ciclos_abiertos: {e}")
-        return JSONResponse(content=[])
+        return JSONResponse(content=[], status_code=500)
 
     ciclos = []
-    for c in ciclos_abiertos:
+    for c in resultados:
+        # ✅ Manejo seguro de valores Decimal → float
+        tiempo = float(c.tiempo_total_min) if isinstance(c.tiempo_total_min, Decimal) else (c.tiempo_total_min or 0)
+        tiempo_str = f"{int(round(tiempo)):02d} min"  # ejemplo: 03 min, 64 min
+
         ciclos.append({
             "placa": c.placa,
             "puntos_escaneados": c.puntos_escaneados,
             "inicio": formatear_hora_panama(c.inicio_ciclo),
             "ultimo_escaneo": formatear_hora_panama(c.ultimo_escaneo),
-            "minutos_transcurridos": round(c.tiempo_total_min or 0, 1)
+            "minutos_transcurridos": tiempo_str
         })
 
     return JSONResponse(content=ciclos)
@@ -75,13 +79,16 @@ async def accion_manual(request: Request, db: Session = Depends(get_db)):
     if not ciclo:
         return JSONResponse(status_code=404, content={"error": "No se encontró ciclo abierto para esa placa."})
 
+    # Acción: eliminar ciclo
     if accion == "eliminar":
-        db.execute(text("DELETE FROM escaneos WHERE ciclo_id = :cid"), {"cid": ciclo.ciclo_id})
-        db.execute(text("DELETE FROM ciclos WHERE id = :cid"), {"cid": ciclo.ciclo_id})
+        db.execute(text("""
+            DELETE FROM escaneos WHERE ciclo_id = :cid;
+            DELETE FROM ciclos WHERE id = :cid;
+        """), {"cid": ciclo.ciclo_id})
         db.execute(text("""
             INSERT INTO ciclos_manual 
             (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
-            VALUES (:placa, NOW(), :motivo, :detalles::jsonb, :sid, :cid, :registrado_por)
+            VALUES (:placa, NOW(), :motivo, :detalles::jsonb, :sid, :cid, :registrado_por);
         """), {
             "placa": placa,
             "motivo": motivo,
@@ -94,12 +101,15 @@ async def accion_manual(request: Request, db: Session = Depends(get_db)):
         print(f"🗑️ Ciclo eliminado manualmente: {placa} ({motivo}) — {registrado_por}")
         return JSONResponse(content={"success": True, "msg": "Ciclo eliminado correctamente."})
 
+    # Acción: cerrar ciclo
     elif accion == "cerrar":
-        db.execute(text("UPDATE ciclos SET completado = TRUE, fin = NOW() WHERE id = :cid"), {"cid": ciclo.ciclo_id})
+        db.execute(text("""
+            UPDATE ciclos SET completado = TRUE, fin = NOW() WHERE id = :cid;
+        """), {"cid": ciclo.ciclo_id})
         db.execute(text("""
             INSERT INTO ciclos_manual 
             (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
-            VALUES (:placa, NOW(), :motivo, :detalles::jsonb, :sid, :cid, :registrado_por)
+            VALUES (:placa, NOW(), :motivo, :detalles::jsonb, :sid, :cid, :registrado_por);
         """), {
             "placa": placa,
             "motivo": motivo,
@@ -112,4 +122,5 @@ async def accion_manual(request: Request, db: Session = Depends(get_db)):
         print(f"✅ Ciclo cerrado manualmente: {placa} ({motivo}) — {registrado_por}")
         return JSONResponse(content={"success": True, "msg": "Ciclo cerrado correctamente."})
 
-    return JSONResponse(status_code=400, content={"error": "Acción no válida."})
+    else:
+        return JSONResponse(status_code=400, content={"error": "Acción no válida."})
