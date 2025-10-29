@@ -3,6 +3,10 @@ from sqlalchemy import text
 from app import models
 from app.utils.timezone import ahora_panama, formatear_hora_panama
 
+def registrar_cierre_ciclo(sesion, hora_cierre):
+    """Registra en consola el cierre de un ciclo."""
+    print(f"✅ Ciclo completado: Placa {sesion.placa} — {formatear_hora_panama(hora_cierre)}")
+
 def eliminar_ciclo_incompleto(db, ciclo, sesion, crud):
     # 1️⃣ Verificar si ya se registró esta eliminación
     existe = db.execute(text("""
