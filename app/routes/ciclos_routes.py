@@ -4,8 +4,9 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal
+from datetime import datetime, timezone
 from app.database import get_db
-from app.utils.timezone import formatear_hora_panama
+from app.utils.timezone import formatear_hora_panama, ahora_panama
 from fastapi.templating import Jinja2Templates
 
 router = APIRouter()
@@ -29,8 +30,7 @@ async def obtener_ciclos_abiertos(db: Session = Depends(get_db)):
                 placa,
                 puntos_escaneados,
                 inicio_ciclo,
-                ultimo_escaneo,
-                tiempo_total_min
+                ultimo_escaneo
             FROM ciclos_abiertos
             ORDER BY ultimo_escaneo DESC;
         """)
@@ -39,15 +39,29 @@ async def obtener_ciclos_abiertos(db: Session = Depends(get_db)):
         print(f"⚠️ Error al consultar la vista ciclos_abiertos: {e}")
         return JSONResponse(content=[], status_code=500)
 
+    ahora = ahora_panama()
     ciclos = []
     for c in resultados:
-        # ✅ Manejo seguro de valores Decimal → float
-        tiempo = float(c.tiempo_total_min) if isinstance(c.tiempo_total_min, Decimal) else (c.tiempo_total_min or 0)
-        tiempo_str = f"{int(round(tiempo)):02d} min"  # ejemplo: 03 min, 64 min
+        # 🔹 Limpiar puntos escaneados (mostrar solo números únicos en orden)
+        if isinstance(c.puntos_escaneados, list):
+            puntos = [p for p in c.puntos_escaneados if p.startswith("punto")]
+            numeros = sorted({int(p.replace("punto", "")) for p in puntos})
+            puntos_str = ", ".join(str(n) for n in numeros)
+        elif isinstance(c.puntos_escaneados, str):
+            partes = c.puntos_escaneados.split(",")
+            numeros = sorted({int(p.replace("punto", "")) for p in partes if "punto" in p})
+            puntos_str = ", ".join(str(n) for n in numeros)
+        else:
+            puntos_str = "-"
+
+        # 🔹 Calcular tiempo total (en minutos) desde el primer escaneo hasta ahora
+        inicio = c.inicio_ciclo.replace(tzinfo=timezone.utc)
+        delta_min = (ahora - inicio).total_seconds() / 60
+        tiempo_str = f"{int(round(delta_min)):02d} min"
 
         ciclos.append({
             "placa": c.placa,
-            "puntos_escaneados": c.puntos_escaneados,
+            "puntos_escaneados": puntos_str,
             "inicio": formatear_hora_panama(c.inicio_ciclo),
             "ultimo_escaneo": formatear_hora_panama(c.ultimo_escaneo),
             "minutos_transcurridos": tiempo_str
