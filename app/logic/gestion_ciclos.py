@@ -10,7 +10,7 @@ def eliminar_ciclo_incompleto(db, ciclo, sesion, crud):
 
     hora_eliminacion = ahora_panama()
     db.execute(
-        text("INSERT INTO ciclos_eliminados (placa, hora_eliminacion) VALUES (:placa, :hora_eliminacion)"),
+        text("INSERT INTO ciclo_manual (placa, hora_eliminacion) VALUES (:placa, :hora_eliminacion)"),
         {"placa": sesion.placa, "hora_eliminacion": hora_eliminacion}
     )
     db.commit()
@@ -24,7 +24,7 @@ def registrar_cierre_ciclo(sesion, hora_cierre):
 # =============================================
 
 def cerrar_ciclo_manual(db, ciclo_id, sesion_id, placa, motivo, detalles, registrado_por):
-    """Marca el ciclo como completado manualmente y lo registra en ciclos_eliminados."""
+    """Marca el ciclo como completado manualmente y lo registra en ciclo_manual."""
     hora_cierre = ahora_panama()
     db.execute(text("""
         UPDATE ciclos 
@@ -34,7 +34,7 @@ def cerrar_ciclo_manual(db, ciclo_id, sesion_id, placa, motivo, detalles, regist
     db.commit()
 
     db.execute(text("""
-        INSERT INTO ciclos_eliminados 
+        INSERT INTO ciclo_manual 
         (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
         VALUES (:placa, :fecha_eliminacion, :motivo, :detalles, :sesion_id, :ciclo_id, :registrado_por)
     """), {
@@ -51,11 +51,11 @@ def cerrar_ciclo_manual(db, ciclo_id, sesion_id, placa, motivo, detalles, regist
 
 
 def eliminar_ciclo_manual(db, ciclo_id, sesion_id, placa, motivo, detalles, registrado_por):
-    """Elimina completamente el ciclo y guarda el registro en ciclos_eliminados."""
+    """Elimina completamente el ciclo y guarda el registro en ciclo_manual."""
     hora_eliminacion = ahora_panama()
 
     db.execute(text("""
-        INSERT INTO ciclos_eliminados 
+        INSERT INTO ciclo_manual 
         (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
         VALUES (:placa, :fecha_eliminacion, :motivo, :detalles, :sesion_id, :ciclo_id, :registrado_por)
     """), {
