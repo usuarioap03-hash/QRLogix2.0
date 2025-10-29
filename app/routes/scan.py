@@ -67,7 +67,15 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
     if not ciclo:
         ciclo = crud.create_ciclo(db, sesion.id)
 
-    escaneo = crud.create_escaneo(db, ciclo.id, punto)
+    # Crear escaneo con hora local Panamá
+    nuevo_escaneo = crud.EscanerModel(
+        sesion_id=sesion.id,
+        punto=punto,
+        fecha_hora=ahora_panama()  # Guarda hora local Panamá
+    )
+    db.add(nuevo_escaneo)
+    db.commit()
+    escaneo = nuevo_escaneo
 
     if punto == "punto5":
         if not any(e.punto == "punto3" for e in ciclo.escaneos):
@@ -115,7 +123,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
         "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%-I:%M %p"),
         "puntos": puntos_list,
         "estados": estados,
-        "nombres": {"punto1": "Patio", "punto2": "Bodega", "punto3": "Carga", "punto4": "Salida Parcial", "punto5": "Salida"},
+        "nombres": {"punto1": "Patio", "punto2": "Bodega", "punto3": "Carga", "punto4": "Lona", "punto5": "Salida"},
         "modo": modo,
         "mensaje_titulo": seleccionado["titulo"],
         "mensaje_texto": seleccionado["texto"],
@@ -149,7 +157,14 @@ async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db:
             eliminar_ciclo_incompleto(db, ciclo, sesion, crud)
             return RedirectResponse(url="/", status_code=303)
 
-    crud.create_escaneo(db, ciclo.id, punto)
+    # Crear escaneo con hora local Panamá
+    nuevo_escaneo = crud.EscanerModel(
+        sesion_id=sesion.id,
+        punto=punto,
+        fecha_hora=ahora_panama()  # Guarda hora local Panamá
+    )
+    db.add(nuevo_escaneo)
+    db.commit()
     return response
 
 
