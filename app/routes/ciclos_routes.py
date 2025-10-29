@@ -1,11 +1,10 @@
-# app/routes/ciclos.py
-from fastapi import APIRouter, Request, Depends, Form
+# app/routes/ciclos_routes.py
+from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.database import get_db
-from app.utils.timezone import ahora_panama
-from app.logic import gestion_ciclos as ciclos_logic
+from app.utils.timezone import formatear_hora_panama
 from fastapi.templating import Jinja2Templates
 
 router = APIRouter()
@@ -16,33 +15,34 @@ templates = Jinja2Templates(directory="app/templates")
 # ======================================================
 @router.get("/ciclos", response_class=HTMLResponse)
 async def mostrar_ciclos(request: Request, db: Session = Depends(get_db)):
-    query = text("""
-        SELECT s.placa,
-               ARRAY_AGG(e.punto ORDER BY e.fecha_hora) AS puntos_escaneados,
-               MIN(e.fecha_hora) AS inicio,
-               MAX(e.fecha_hora) AS ultimo_escaneo,
-               EXTRACT(EPOCH FROM (MAX(e.fecha_hora) - MIN(e.fecha_hora))) / 60 AS minutos_transcurridos
-        FROM ciclos c
-        JOIN escaneos e ON e.ciclo_id = c.id
-        JOIN sesiones s ON s.id = c.sesion_id
-        WHERE c.completado = FALSE
-        GROUP BY s.placa, c.id
-        ORDER BY inicio ASC;
-    """)
-    ciclos_abiertos = db.execute(query).fetchall()
+    try:
+        # Consultar directamente la vista en PostgreSQL
+        query = text("""
+            SELECT 
+                placa,
+                puntos_escaneados,
+                inicio_ciclo,
+                ultimo_escaneo,
+                tiempo_total_min
+            FROM ciclos_abiertos
+            ORDER BY ultimo_escaneo DESC;
+        """)
+        ciclos_abiertos = db.execute(query).fetchall()
+    except Exception as e:
+        print(f"⚠️ Error al consultar la vista ciclos_abiertos: {e}")
+        ciclos_abiertos = []
 
     ciclos = []
     for c in ciclos_abiertos:
         ciclos.append({
             "placa": c.placa,
             "puntos_escaneados": c.puntos_escaneados,
-            "inicio": c.inicio,
-            "ultimo_escaneo": c.ultimo_escaneo,
-            "minutos_transcurridos": c.minutos_transcurridos
+            "inicio": formatear_hora_panama(c.inicio_ciclo),
+            "ultimo_escaneo": formatear_hora_panama(c.ultimo_escaneo),
+            "minutos_transcurridos": round(c.tiempo_total_min or 0, 1)
         })
 
     return templates.TemplateResponse("ciclos.html", {"request": request, "ciclos": ciclos})
-
 
 # ======================================================
 # ⚙️ REGISTRO MANUAL (CERRAR O ELIMINAR)
@@ -55,52 +55,55 @@ async def accion_manual(request: Request, db: Session = Depends(get_db)):
     detalles = data.get("detalles")
     registrado_por = data.get("registrado_por")
     accion = data.get("accion")
-    fecha = ahora_panama()
 
-    # Obtener sesión y ciclo activos
-    sesion = db.execute(text("SELECT id FROM sesiones WHERE placa = :placa ORDER BY inicio DESC LIMIT 1"), {"placa": placa}).fetchone()
-    if not sesion:
-        return JSONResponse(status_code=404, content={"error": "No se encontró sesión activa para esa placa."})
-    
-    ciclo = db.execute(text("SELECT id FROM ciclos WHERE sesion_id = :sesion_id AND completado = FALSE ORDER BY inicio DESC LIMIT 1"), {"sesion_id": sesion.id}).fetchone()
+    # Verificar ciclo activo mediante la vista
+    ciclo = db.execute(text("""
+        SELECT sesion_id, ciclo_id 
+        FROM ciclos_abiertos 
+        WHERE placa = :placa 
+        ORDER BY ultimo_escaneo DESC 
+        LIMIT 1;
+    """), {"placa": placa}).fetchone()
+
     if not ciclo:
-        return JSONResponse(status_code=404, content={"error": "No hay ciclo activo para esa placa."})
+        return JSONResponse(status_code=404, content={"error": "No se encontró ciclo abierto para esa placa."})
 
-    # Acción: eliminar ciclo
+    # Lógica de acciones
     if accion == "eliminar":
-        db.execute(text("DELETE FROM escaneos WHERE ciclo_id = :cid"), {"cid": ciclo.id})
-        db.execute(text("DELETE FROM ciclos WHERE id = :cid"), {"cid": ciclo.id})
         db.execute(text("""
-            INSERT INTO ciclos_manual (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
-            VALUES (:placa, :fecha, :motivo, :detalles::jsonb, :sid, :cid, :registrado_por)
+            DELETE FROM escaneos WHERE ciclo_id = :cid;
+            DELETE FROM ciclos WHERE id = :cid;
+        """), {"cid": ciclo.ciclo_id})
+        db.execute(text("""
+            INSERT INTO ciclos_manual 
+            (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
+            VALUES (:placa, NOW(), :motivo, :detalles::jsonb, :sid, :cid, :registrado_por);
         """), {
             "placa": placa,
-            "fecha": fecha,
             "motivo": motivo,
             "detalles": detalles or "{}",
-            "sid": sesion.id,
-            "cid": ciclo.id,
+            "sid": ciclo.sesion_id,
+            "cid": ciclo.ciclo_id,
             "registrado_por": registrado_por
         })
         db.commit()
         print(f"🗑️ Ciclo eliminado manualmente: {placa} ({motivo}) — {registrado_por}")
         return JSONResponse(content={"success": True, "msg": "Ciclo eliminado correctamente."})
 
-    # Acción: cerrar ciclo
     elif accion == "cerrar":
         db.execute(text("""
-            UPDATE ciclos SET completado = TRUE, fin = :fecha WHERE id = :cid
-        """), {"fecha": fecha, "cid": ciclo.id})
+            UPDATE ciclos SET completado = TRUE, fin = NOW() WHERE id = :cid;
+        """), {"cid": ciclo.ciclo_id})
         db.execute(text("""
-            INSERT INTO ciclos_manual (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
-            VALUES (:placa, :fecha, :motivo, :detalles::jsonb, :sid, :cid, :registrado_por)
+            INSERT INTO ciclos_manual 
+            (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
+            VALUES (:placa, NOW(), :motivo, :detalles::jsonb, :sid, :cid, :registrado_por);
         """), {
             "placa": placa,
-            "fecha": fecha,
             "motivo": motivo,
             "detalles": detalles or "{}",
-            "sid": sesion.id,
-            "cid": ciclo.id,
+            "sid": ciclo.sesion_id,
+            "cid": ciclo.ciclo_id,
             "registrado_por": registrado_por
         })
         db.commit()

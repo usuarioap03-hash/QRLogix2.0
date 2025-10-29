@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.database import get_db
 from app import crud
-from app.utils.timezone import convertir_a_panama, ahora_panama
+from app.utils.timezone import ahora_panama, formatear_hora_panama
 import uuid
 import random
 from app import config
@@ -67,15 +67,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
     if not ciclo:
         ciclo = crud.create_ciclo(db, sesion.id)
 
-    # Crear escaneo con hora local Panamá
-    nuevo_escaneo = crud.EscanerModel(
-        sesion_id=sesion.id,
-        punto=punto,
-        fecha_hora=ahora_panama()  # Guarda hora local Panamá
-    )
-    db.add(nuevo_escaneo)
-    db.commit()
-    escaneo = nuevo_escaneo
+    escaneo = crud.create_escaneo(db, ciclo.id, punto)
 
     if punto == "punto5":
         if not any(e.punto == "punto3" for e in ciclo.escaneos):
@@ -84,14 +76,14 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
                 "request": request,
                 "punto": punto,
                 "placa": sesion.placa,
-                "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%-I:%M %p"),
+                "hora": formatear_hora_panama(escaneo.fecha_hora),
             })
         else:
             ciclo.fin = ahora_panama()
             ciclo.completado = True
             db.commit()
             registrar_cierre_ciclo(sesion, ciclo.fin)
-            hora_cierre = convertir_a_panama(ciclo.fin).strftime("%-I:%M %p")
+            hora_cierre = formatear_hora_panama(ciclo.fin)
             print(f"✅ Ciclo completado: Placa {sesion.placa} — {hora_cierre}")
             seleccionado = obtener_mensaje("recordatorio")
             return templates.TemplateResponse("confirmacion_salida.html", {
@@ -120,7 +112,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
         "request": request,
         "punto": punto,
         "placa": sesion.placa,  # ahora viene de Sesion
-        "hora": convertir_a_panama(escaneo.fecha_hora).strftime("%-I:%M %p"),
+        "hora": formatear_hora_panama(escaneo.fecha_hora),
         "puntos": puntos_list,
         "estados": estados,
         "nombres": {"punto1": "Patio", "punto2": "Bodega", "punto3": "Carga", "punto4": "Lona", "punto5": "Salida"},
@@ -151,20 +143,12 @@ async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db:
     if not ciclo:
         ciclo = crud.create_ciclo(db, sesion.id)
 
-    # Before saving scan for punto5, check if punto3 was scanned
     if punto == "punto5":
         if not any(e.punto == "punto3" for e in ciclo.escaneos):
             eliminar_ciclo_incompleto(db, ciclo, sesion, crud)
             return RedirectResponse(url="/", status_code=303)
 
-    # Crear escaneo con hora local Panamá
-    nuevo_escaneo = crud.EscanerModel(
-        sesion_id=sesion.id,
-        punto=punto,
-        fecha_hora=ahora_panama()  # Guarda hora local Panamá
-    )
-    db.add(nuevo_escaneo)
-    db.commit()
+    crud.create_escaneo(db, ciclo.id, punto)
     return response
 
 

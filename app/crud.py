@@ -16,7 +16,12 @@ def get_camion_by_cookie(db: Session, cookie: str):
 
 # Sesiones
 def create_sesion(db: Session, camion_id: int, placa: str):
-    sesion = models.Sesion(camion_id=camion_id, placa=placa)
+    sesion = models.Sesion(
+        camion_id=camion_id,
+        placa=placa,
+        inicio=ahora_panama(),
+        fin=models.Sesion.default_fin()
+    )
     db.add(sesion)
     db.commit()
     db.refresh(sesion)
@@ -31,7 +36,7 @@ def get_sesion_activa(db: Session, camion_id: int):
 
 # Ciclos
 def create_ciclo(db: Session, sesion_id: int):
-    ciclo = models.Ciclo(sesion_id=sesion_id)
+    ciclo = models.Ciclo(sesion_id=sesion_id, inicio=ahora_panama())
     db.add(ciclo)
     db.commit()
     db.refresh(ciclo)
@@ -45,7 +50,7 @@ def get_ciclo_activo(db: Session, sesion_id: int):
 
 # Escaneos
 def create_escaneo(db: Session, ciclo_id: int, punto: str):
-    escaneo = models.Escaneo(ciclo_id=ciclo_id, punto=punto)
+    escaneo = models.Escaneo(ciclo_id=ciclo_id, punto=punto, fecha_hora=ahora_panama())
     db.add(escaneo)
     db.commit()
     db.refresh(escaneo)

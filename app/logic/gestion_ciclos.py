@@ -1,7 +1,7 @@
 # app/logic/ciclos.py
 from sqlalchemy import text
 from app import models
-from app.utils.timezone import ahora_panama
+from app.utils.timezone import ahora_panama, formatear_hora_panama
 
 def eliminar_ciclo_incompleto(db, ciclo, sesion, crud):
     db.query(models.Escaneo).filter(models.Escaneo.ciclo_id == ciclo.id).delete()
@@ -14,10 +14,10 @@ def eliminar_ciclo_incompleto(db, ciclo, sesion, crud):
         {"placa": sesion.placa, "hora_eliminacion": hora_eliminacion}
     )
     db.commit()
-    print(f"🚫 Ciclo eliminado por omitir punto3: Placa {sesion.placa} — {hora_eliminacion}")
+    print(f"🚫 Ciclo eliminado por omitir punto3: Placa {sesion.placa} — {formatear_hora_panama(hora_eliminacion)}")
 
 def registrar_cierre_ciclo(sesion, hora_cierre):
-    print(f"✅ Ciclo completado: Placa {sesion.placa} — {hora_cierre}")
+    print(f"✅ Ciclo completado: Placa {sesion.placa} — {formatear_hora_panama(hora_cierre)}")
 
 # =============================================
 # 🔹 NUEVAS FUNCIONES PARA GESTIÓN MANUAL DE CICLOS
@@ -47,7 +47,7 @@ def cerrar_ciclo_manual(db, ciclo_id, sesion_id, placa, motivo, detalles, regist
         "registrado_por": registrado_por
     })
     db.commit()
-    print(f"🟢 Ciclo cerrado manualmente — Placa {placa} — {motivo} — {registrado_por}")
+    print(f"🟢 Ciclo cerrado manualmente — Placa {placa} — {motivo} — {registrado_por} — {formatear_hora_panama(hora_cierre)}")
 
 
 def eliminar_ciclo_manual(db, ciclo_id, sesion_id, placa, motivo, detalles, registrado_por):
@@ -72,4 +72,4 @@ def eliminar_ciclo_manual(db, ciclo_id, sesion_id, placa, motivo, detalles, regi
     db.execute(text("DELETE FROM escaneos WHERE ciclo_id = :ciclo_id"), {"ciclo_id": ciclo_id})
     db.execute(text("DELETE FROM ciclos WHERE id = :ciclo_id"), {"ciclo_id": ciclo_id})
     db.commit()
-    print(f"🚫 Ciclo eliminado manualmente — Placa {placa} — {motivo} — {registrado_por}")
+    print(f"🚫 Ciclo eliminado manualmente — Placa {placa} — {motivo} — {registrado_por} — {formatear_hora_panama(hora_eliminacion)}")
