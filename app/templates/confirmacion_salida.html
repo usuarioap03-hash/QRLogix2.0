@@ -22,14 +22,25 @@
             max-width: 90%;
             padding: 20px;
         }
+        img {
+            margin-bottom: 50px;
+        }
         .placa {
+            color: #C4D600;
             font-size: 2.5rem;
             font-weight: 700;
             margin: 10px 0;
         }
         .hora {
-            font-size: 2rem;
+            font-size: 2.5rem;
             margin-bottom: 1.5rem;
+            font-weight: 600;
+
+        }
+        .fecha {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
         }
         .mensaje {
             background-color: #C4D600;
@@ -43,10 +54,11 @@
 </head>
 <body>
     <div class="contenedor">
-        <img src="/static/imagenes/ARG_logo_hor_color_no_background.png" alt="Logo Argos" width="120">
+        <img src="/app/static/imagenes/ARG_logo_ver_BN_no_background.png" alt="Logo Argos" width="120">
         <div class="placa">Placa: {{ placa }}</div>
         <div class="hora">{{ hora }}</div>
-        <div class="mensaje">Salida registrada correctamente ✅</div>
+        <div class="fecha">{{ fecha }}</div>
+        <div class="mensaje">Salida registrada correctamente</div>
     </div>
 </body>
 </html>

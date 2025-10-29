@@ -3,11 +3,12 @@ from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from decimal import Decimal
 from datetime import timezone
 from app.database import get_db
 from app.utils.timezone import formatear_hora_panama, ahora_panama
 from fastapi.templating import Jinja2Templates
+from datetime import datetime
+import locale
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -17,7 +18,19 @@ templates = Jinja2Templates(directory="app/templates")
 # ======================================================
 @router.get("/ciclos", response_class=HTMLResponse)
 async def mostrar_ciclos(request: Request):
-    return templates.TemplateResponse("ciclos.html", {"request": request})
+    try:
+        locale.setlocale(locale.LC_TIME, 'es_PA.UTF-8')
+    except:
+        locale.setlocale(locale.LC_TIME, 'es_ES')
+
+    # ✅ Fecha en formato "Mié 29 oct"
+    fecha_actual = datetime.now().strftime("%a %d %b").capitalize()
+
+    # Ya no se incluye "ciclos": ciclos, porque se cargan por fetch desde /api/ciclos
+    return templates.TemplateResponse("ciclos.html", {
+        "request": request,
+        "fecha_actual": fecha_actual
+    })
 
 # ======================================================
 # 🔹 API: Datos de la vista ciclos_abiertos
@@ -112,7 +125,7 @@ async def accion_manual(request: Request, db: Session = Depends(get_db)):
             "registrado_por": registrado_por
         })
         db.commit()
-        print(f"🗑️ Ciclo eliminado manualmente: {placa} ({motivo}) — {registrado_por}")
+        print(f"❌ Ciclo eliminado manualmente: {placa} ({motivo}) — {registrado_por}")
         return JSONResponse(content={"success": True, "msg": "Ciclo eliminado correctamente."})
 
     # Acción: cerrar ciclo
