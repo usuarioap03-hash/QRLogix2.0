@@ -144,57 +144,80 @@
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      const tabla = document.getElementById("tabla-ciclos");
-      try {
-        const res = await fetch("/api/ciclos");
-        const data = await res.json();
-        tabla.innerHTML = "";
-        if (data.length === 0) {
-          tabla.innerHTML = `<tr><td colspan="5">No hay ciclos abiertos actualmente.</td></tr>`;
-          return;
-        }
-        data.forEach(c => {
-          const fila = document.createElement("tr");
-          fila.innerHTML = `
-            <td>${c.placa}</td>
-            <td>${c.puntos_escaneados}</td>
-            <td>${c.inicio}</td>
-            <td>${c.ultimo_escaneo}</td>
-            <td>${c.minutos_transcurridos}</td>
-          `;
-          tabla.appendChild(fila);
-        });
-      } catch (err) {
-        console.error("Error al cargar ciclos:", err);
-        tabla.innerHTML = `<tr><td colspan="5">Error al cargar los ciclos 🚫</td></tr>`;
-      }
-    });
+  document.addEventListener("DOMContentLoaded", async () => {
+    const tabla = document.getElementById("tabla-ciclos");
+    const selectPlaca = document.getElementById("placa");
 
-    async function accionManual(tipo) {
-      const data = {
-        placa: document.getElementById("placa").value.trim(),
-        motivo: document.getElementById("motivo").value,
-        detalles: document.getElementById("detalles").value,
-        registrado_por: document.getElementById("registrado_por").value.trim(),
-        accion: tipo
-      };
-      if (!data.placa || !data.motivo || !data.registrado_por) {
-        alert("Por favor completa todos los campos obligatorios ⚠️");
+    try {
+      const res = await fetch("/api/ciclos");
+      const data = await res.json();
+      tabla.innerHTML = "";
+
+      // 🧾 Si no hay ciclos
+      if (data.length === 0) {
+        tabla.innerHTML = `<tr><td colspan="5">No hay ciclos abiertos actualmente.</td></tr>`;
+        selectPlaca.innerHTML = `<option value="">No hay placas activas</option>`;
         return;
       }
-      const res = await fetch("/ciclos/accion", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
+
+      // 🧱 Construir tabla
+      const placasUnicas = new Set();
+      data.forEach(c => {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td>${c.placa}</td>
+          <td>${c.puntos_escaneados}</td>
+          <td>${c.inicio}</td>
+          <td>${c.ultimo_escaneo}</td>
+          <td>${c.minutos_transcurridos}</td>
+        `;
+        tabla.appendChild(fila);
+        placasUnicas.add(c.placa);
       });
-      if (res.ok) {
-        alert(`Ciclo ${tipo === 'cerrar' ? 'cerrado' : 'eliminado'} correctamente ✅`);
-        location.reload();
-      } else {
-        alert("Error al procesar la acción ❌");
-      }
+
+      // 🚗 Rellenar lista de placas
+      selectPlaca.innerHTML = `<option value="">Seleccionar placa...</option>`;
+      [...placasUnicas].forEach(placa => {
+        const opt = document.createElement("option");
+        opt.value = placa;
+        opt.textContent = placa;
+        selectPlaca.appendChild(opt);
+      });
+
+    } catch (err) {
+      console.error("Error al cargar ciclos:", err);
+      tabla.innerHTML = `<tr><td colspan="5">Error al cargar los ciclos 🚫</td></tr>`;
+      selectPlaca.innerHTML = `<option value="">Error al cargar placas</option>`;
     }
-  </script>
+  });
+
+  async function accionManual(tipo) {
+    const data = {
+      placa: document.getElementById("placa").value,
+      motivo: document.getElementById("motivo").value,
+      detalles: document.getElementById("detalles").value,
+      registrado_por: document.getElementById("registrado_por").value.trim(),
+      accion: tipo
+    };
+
+    if (!data.placa || !data.motivo || !data.registrado_por) {
+      alert("Por favor completa todos los campos obligatorios ⚠️");
+      return;
+    }
+
+    const res = await fetch("/ciclos/accion", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    if (res.ok) {
+      alert(`Ciclo ${tipo === 'cerrar' ? 'cerrado' : 'eliminado'} correctamente ✅`);
+      location.reload();
+    } else {
+      alert("Error al procesar la acción ❌");
+    }
+  }
+</script>
 </body>
 </html>
