@@ -113,32 +113,34 @@
 
   <div class="form-section">
     <h2>Registrar acción manual</h2>
-    <form id="formCiclo">
-      <label for="placa">Placa</label>
-      <input type="text" id="placa" name="placa" required maxlength="6" placeholder="Ejemplo: HE2345">
+      <form id="formCiclo">
+        <label for="placa">Placa</label>
+        <select id="placa" name="placa" required>
+          <option value="">Seleccionar placa...</option>
+        </select>
 
-      <label for="motivo">Motivo</label>
-      <select id="motivo" name="motivo" required>
-        <option value="">Seleccionar...</option>
-        <option>Salida sin cargar</option>
-        <option>Viaje cancelado</option>
-        <option>Vehículo averiado</option>
-        <option>Falta de celular</option>
-        <option>Celular sin batería</option>
-        <option>Otro</option>
-      </select>
+        <label for="motivo">Motivo</label>
+        <select id="motivo" name="motivo" required>
+          <option value="">Seleccionar...</option>
+          <option>Salida sin cargar</option>
+          <option>Viaje cancelado</option>
+          <option>Vehículo averiado</option>
+          <option>Falta de celular</option>
+          <option>Celular sin batería</option>
+          <option>Otro</option>
+        </select>
 
-      <label for="detalles">Detalles (opcional)</label>
-      <textarea id="detalles" name="detalles" rows="3"></textarea>
+        <label for="detalles">Detalles (opcional)</label>
+        <textarea id="detalles" name="detalles" rows="3"></textarea>
 
-      <label for="registrado_por">Registrado por</label>
-      <input type="text" id="registrado_por" name="registrado_por" required placeholder="Ej: logística">
+        <label for="registrado_por">Registrado por</label>
+        <input type="text" id="registrado_por" name="registrado_por" required placeholder="Ej: logística">
 
-      <div class="buttons">
-        <button type="button" class="cerrar" onclick="accionManual('cerrar')">Cerrar viaje</button>
-        <button type="button" class="eliminar" onclick="accionManual('eliminar')">Eliminar ciclo</button>
-      </div>
-    </form>
+        <div class="buttons">
+          <button type="button" class="cerrar" onclick="accionManual('cerrar')">Cerrar viaje</button>
+          <button type="button" class="eliminar" onclick="accionManual('eliminar')">Eliminar ciclo</button>
+        </div>
+      </form>
   </div>
 
   <script>
