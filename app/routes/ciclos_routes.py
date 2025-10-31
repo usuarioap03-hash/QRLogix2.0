@@ -3,9 +3,8 @@ from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from datetime import timezone
 from app.database import get_db
-from app.utils.timezone import formatear_hora_panama, ahora_panama
+from app.utils.timezone import formatear_hora_panama, ahora_panama, convertir_a_panama
 from fastapi.templating import Jinja2Templates
 from datetime import datetime
 import locale
@@ -64,16 +63,21 @@ async def obtener_ciclos_abiertos(db: Session = Depends(get_db)):
         else:
             puntos_str = "-"
 
-        # 🔹 Calcular tiempo total (minutos desde inicio hasta ahora)
-        inicio = c.inicio_ciclo.replace(tzinfo=timezone.utc)
-        delta_min = (ahora - inicio).total_seconds() / 60
+        inicio_dt = convertir_a_panama(c.inicio_ciclo)
+        ultimo_dt = convertir_a_panama(c.ultimo_escaneo)
+
+        if not inicio_dt or not ultimo_dt:
+            continue  # evita filas incompletas
+
+        # 🔹 Calcular tiempo total (minutos desde inicio hasta ahora en Panamá)
+        delta_min = (ahora - inicio_dt).total_seconds() / 60
         tiempo_str = f"{int(round(delta_min)):02d} min"
 
         ciclos.append({
             "placa": c.placa,
             "puntos_escaneados": puntos_str,
-            "inicio": formatear_hora_panama(c.inicio_ciclo),
-            "ultimo_escaneo": formatear_hora_panama(c.ultimo_escaneo),
+            "inicio": formatear_hora_panama(inicio_dt),
+            "ultimo_escaneo": formatear_hora_panama(ultimo_dt),
             "minutos_transcurridos": tiempo_str
         })
 

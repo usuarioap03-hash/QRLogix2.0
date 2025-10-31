@@ -2,7 +2,6 @@ from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-from sqlalchemy import text
 from app.database import get_db
 from app import crud
 from app.utils.timezone import ahora_panama, formatear_hora_panama
@@ -11,7 +10,7 @@ import random
 from app import config
 from app.logic.mensajes import obtener_mensaje
 from app.logic.gestion_ciclos import eliminar_ciclo_incompleto
-from app.logic.gestion_ciclos import registrar_cierre_ciclo
+from app.logic.gestion_ciclos import registrar_cierre_ciclo, registrar_escaneo
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -63,21 +62,36 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
             "VALIDAR_GEOZONA": config.VALIDAR_GEOZONA,
         })
 
-    ciclo = crud.get_ciclo_activo(db, sesion.id)
-    if not ciclo:
-        ciclo = crud.create_ciclo(db, sesion.id)
-
-    escaneo = crud.create_escaneo(db, ciclo.id, punto)
+    registro = registrar_escaneo(
+        db=db,
+        device_cookie=device_id,
+        placa=sesion.placa,
+        punto=punto,
+        crud_module=crud,
+    )
+    sesion = registro["sesion"]
+    ciclo = registro["ciclo"]
+    escaneo = registro["escaneo"]
+    cookie_canonica = registro["cookie"]
 
     if punto == "punto5":
         if not any(e.punto == "punto3" for e in ciclo.escaneos):
             eliminar_ciclo_incompleto(db, ciclo, sesion, crud)
-            return templates.TemplateResponse("confirmacion_salida.html", {
+            response = templates.TemplateResponse("confirmacion_salida.html", {
                 "request": request,
                 "punto": punto,
                 "placa": sesion.placa,
                 "hora": formatear_hora_panama(escaneo.fecha_hora),
             })
+            if cookie_canonica and cookie_canonica != device_id:
+                response.set_cookie(
+                    key=COOKIE_NAME,
+                    value=cookie_canonica,
+                    max_age=COOKIE_MAX_AGE,
+                    httponly=True,
+                    samesite="Lax",
+                )
+            return response
         else:
             ciclo.fin = ahora_panama()
             ciclo.completado = True
@@ -86,12 +100,21 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
             hora_cierre = formatear_hora_panama(ciclo.fin)
             print(f"✅ Ciclo completado: Placa {sesion.placa} — {hora_cierre}")
             seleccionado = obtener_mensaje("recordatorio")
-            return templates.TemplateResponse("confirmacion_salida.html", {
+            response = templates.TemplateResponse("confirmacion_salida.html", {
                 "request": request,
                 "punto": punto,
                 "placa": sesion.placa,
                 "hora": hora_cierre,
             })
+            if cookie_canonica and cookie_canonica != device_id:
+                response.set_cookie(
+                    key=COOKIE_NAME,
+                    value=cookie_canonica,
+                    max_age=COOKIE_MAX_AGE,
+                    httponly=True,
+                    samesite="Lax",
+                )
+            return response
 
     estados = {}
     puntos_list = ["punto1", "punto2", "punto3", "punto4", "punto5"]
@@ -108,7 +131,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
 
     seleccionado = obtener_mensaje("recordatorio")
 
-    return templates.TemplateResponse("confirmacion.html", {
+    response = templates.TemplateResponse("confirmacion.html", {
         "request": request,
         "punto": punto,
         "placa": sesion.placa,  # ahora viene de Sesion
@@ -121,6 +144,15 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
         "mensaje_texto": seleccionado["texto"],
         "ilustracion": seleccionado["imagen"],
     })
+    if cookie_canonica and cookie_canonica != device_id:
+        response.set_cookie(
+            key=COOKIE_NAME,
+            value=cookie_canonica,
+            max_age=COOKIE_MAX_AGE,
+            httponly=True,
+            samesite="Lax",
+        )
+    return response
 
 @router.post("/scan/{punto}", response_class=HTMLResponse)
 async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db: Session = Depends(get_db)):
@@ -131,17 +163,27 @@ async def scan_qr_post(request: Request, punto: str, plate: str = Form(...), db:
     # convertir la placa a mayúsculas
     plate = plate.upper()
 
-    camion = crud.get_camion_by_cookie(db, device_id)
-    if not camion:
-        camion = crud.create_camion(db, device_cookie=device_id)
+    registro = registrar_escaneo(
+        db=db,
+        device_cookie=device_id,
+        placa=plate,
+        punto=punto,
+        crud_module=crud,
+        crear_escaneo=False,
+    )
 
-    sesion = crud.get_sesion_activa(db, camion.id)
-    if not sesion:
-        sesion = crud.create_sesion(db, camion.id, plate)
+    sesion = registro["sesion"]
+    ciclo = registro["ciclo"]
+    cookie_canonica = registro["cookie"]
 
-    ciclo = crud.get_ciclo_activo(db, sesion.id)
-    if not ciclo:
-        ciclo = crud.create_ciclo(db, sesion.id)
+    if cookie_canonica and cookie_canonica != device_id:
+        response.set_cookie(
+            key=COOKIE_NAME,
+            value=cookie_canonica,
+            max_age=COOKIE_MAX_AGE,
+            httponly=True,
+            samesite="Lax",
+        )
 
     if punto == "punto5":
         if not any(e.punto == "punto3" for e in ciclo.escaneos):

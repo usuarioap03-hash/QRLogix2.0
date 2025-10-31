@@ -1,7 +1,74 @@
 # app/logic/ciclos.py
+from datetime import timedelta
+from typing import Optional
 from sqlalchemy import text
 from app import models
 from app.utils.timezone import ahora_panama, formatear_hora_panama
+
+def registrar_escaneo(db, device_cookie: str, placa: str, punto: Optional[str] = None, crud_module=None, crear_escaneo: bool = True):
+    """
+    Registra un escaneo reutilizando ciclos existentes cuando la misma placa escanea
+    desde otro dispositivo dentro de la última hora.
+    """
+    if crud_module is None:
+        raise ValueError("crud_module es requerido para registrar escaneos")
+    ahora = ahora_panama()
+    limite_reutilizacion = ahora - timedelta(minutes=60)
+
+    cookie_canonica = device_cookie
+    camion = crud_module.get_camion_by_cookie(db, device_cookie) if device_cookie else None
+    sesion = crud_module.get_sesion_activa(db, camion.id) if camion else None
+    ciclo = None
+    reutilizo = False
+
+    if sesion is None and placa:
+        sesion_placa = crud_module.get_sesion_activa_por_placa(db, placa)
+        if sesion_placa:
+            ciclo_existente = crud_module.get_ciclo_activo(db, sesion_placa.id)
+            ultimo_escaneo = None
+            if ciclo_existente:
+                ultimo_escaneo = crud_module.get_ultimo_escaneo_por_ciclo(db, ciclo_existente.id)
+            if (
+                ciclo_existente
+                and ultimo_escaneo
+                and ultimo_escaneo.fecha_hora >= limite_reutilizacion
+                and sesion_placa.camion
+                and sesion_placa.camion.device_cookie
+                and sesion_placa.camion.device_cookie != device_cookie
+            ):
+                camion = sesion_placa.camion
+                sesion = sesion_placa
+                ciclo = ciclo_existente
+                cookie_canonica = sesion_placa.camion.device_cookie
+                reutilizo = True
+
+    if camion is None:
+        camion = crud_module.create_camion(db, device_cookie=cookie_canonica)
+
+    if sesion is None:
+        sesion = crud_module.create_sesion(db, camion.id, placa)
+    elif sesion.camion_id != camion.id:
+        sesion.camion_id = camion.id
+        db.commit()
+        db.refresh(sesion)
+
+    if ciclo is None:
+        ciclo = crud_module.get_ciclo_activo(db, sesion.id)
+    if ciclo is None:
+        ciclo = crud_module.create_ciclo(db, sesion.id)
+
+    escaneo = None
+    if crear_escaneo and punto is not None:
+        escaneo = crud_module.create_escaneo(db, ciclo.id, punto)
+
+    return {
+        "camion": camion,
+        "sesion": sesion,
+        "ciclo": ciclo,
+        "escaneo": escaneo,
+        "cookie": cookie_canonica,
+        "reutilizado": reutilizo,
+    }
 
 def registrar_cierre_ciclo(sesion, hora_cierre):
     """Registra en consola el cierre de un ciclo."""

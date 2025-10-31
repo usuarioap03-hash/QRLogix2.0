@@ -1,4 +1,5 @@
 # app/crud.py
+from datetime import timedelta
 from sqlalchemy.orm import Session
 from app import models
 from app.utils.timezone import ahora_panama
@@ -50,8 +51,39 @@ def get_ciclo_activo(db: Session, sesion_id: int):
 
 # Escaneos
 def create_escaneo(db: Session, ciclo_id: int, punto: str):
+    hace_60_min = ahora_panama() - timedelta(minutes=60)
+    ultimo = (
+        db.query(models.Escaneo)
+        .filter(
+            models.Escaneo.ciclo_id == ciclo_id,
+            models.Escaneo.punto == punto
+        )
+        .order_by(models.Escaneo.fecha_hora.desc())
+        .first()
+    )
+
+    if ultimo and ultimo.fecha_hora >= hace_60_min:
+        return ultimo
+
     escaneo = models.Escaneo(ciclo_id=ciclo_id, punto=punto, fecha_hora=ahora_panama())
     db.add(escaneo)
     db.commit()
     db.refresh(escaneo)
     return escaneo
+
+def get_sesion_activa_por_placa(db: Session, placa: str):
+    """Obtiene la sesión activa más reciente para una placa sin importar la cookie."""
+    return db.query(models.Sesion).filter(
+        models.Sesion.placa == placa,
+        models.Sesion.cerrada == False,
+        models.Sesion.fin >= ahora_panama()
+    ).order_by(models.Sesion.id.desc()).first()
+
+def get_ultimo_escaneo_por_ciclo(db: Session, ciclo_id: int):
+    """Devuelve el último escaneo registrado para un ciclo."""
+    return (
+        db.query(models.Escaneo)
+        .filter(models.Escaneo.ciclo_id == ciclo_id)
+        .order_by(models.Escaneo.fecha_hora.desc())
+        .first()
+    )
