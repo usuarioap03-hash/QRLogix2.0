@@ -49,8 +49,8 @@ def get_ciclo_activo(db: Session, sesion_id: int):
         models.Ciclo.completado == False
     ).order_by(models.Ciclo.id.desc()).first()
 
-# Escaneos
-def create_escaneo(db: Session, ciclo_id: int, punto: str):
+ # Escaneos
+def create_escaneo(db: Session, ciclo_id: int, punto: str, device_cookie=None):
     hace_60_min = ahora_panama() - timedelta(minutes=60)
     ultimo = (
         db.query(models.Escaneo)
@@ -65,7 +65,19 @@ def create_escaneo(db: Session, ciclo_id: int, punto: str):
     if ultimo and ultimo.fecha_hora >= hace_60_min:
         return ultimo
 
-    escaneo = models.Escaneo(ciclo_id=ciclo_id, punto=punto, fecha_hora=ahora_panama())
+    if device_cookie is not None:
+        escaneo = models.Escaneo(
+            ciclo_id=ciclo_id,
+            punto=punto,
+            fecha_hora=ahora_panama(),
+            device_cookie=device_cookie
+        )
+    else:
+        escaneo = models.Escaneo(
+            ciclo_id=ciclo_id,
+            punto=punto,
+            fecha_hora=ahora_panama()
+        )
     db.add(escaneo)
     db.commit()
     db.refresh(escaneo)

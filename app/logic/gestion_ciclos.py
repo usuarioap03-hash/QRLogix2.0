@@ -59,7 +59,11 @@ def registrar_escaneo(db, device_cookie: str, placa: str, punto: Optional[str] =
 
     escaneo = None
     if crear_escaneo and punto is not None:
-        escaneo = crud_module.create_escaneo(db, ciclo.id, punto)
+        escaneo = crud_module.create_escaneo(
+    db=db,
+    ciclo_id=ciclo.id,
+    punto=punto,
+    device_cookie=device_cookie)
 
     return {
         "camion": camion,
