@@ -28,8 +28,6 @@ async def mostrar_tablero(request: Request, db: Session = Depends(get_db)):
         "punto1": "Patio",
         "punto2": "Bodega",
         "punto3": "Cargando",
-        "punto4": "Cargando",
-        "punto5": "Cargando",
     }
 
     # Subconsulta para obtener la última marca de tiempo por ciclo
@@ -87,6 +85,7 @@ async def mostrar_tablero(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse("tablero.html", {
         "request": request,
         "tablero": tablero,
+        "columnas": COLUMNAS_TABLERO,
     })
 
 

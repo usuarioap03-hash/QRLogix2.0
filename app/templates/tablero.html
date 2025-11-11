@@ -238,7 +238,7 @@
             color: #FF8C42;
         }
 
-        .icon-pre-carga {
+        .icon-bodega {
             color: #01b3ff;
         }
 
@@ -390,11 +390,11 @@
 
         <div class="tablero" id="tablero">
             {% set iconos = {
-                'Espera': 'fa-hourglass-start icon-patio',
-                'Pre-Carga': 'fa-boxes-stacked icon-pre-carga',
+                'Patio': 'fa-hourglass-start icon-patio',
+                'Bodega': 'fa-boxes-stacked icon-bodega',
                 'Cargando': 'fa-truck-ramp-box icon-cargando'
             } %}
-            {% for columna in ['Patio', 'Pre-Carga', 'Cargando'] %}
+            {% for columna in ['Patio', 'Bodega', 'Cargando'] %}
             <div class="columna" id="{{ columna }}">
                 <h2>
                     <i class="fa-solid {{ iconos[columna] }}"></i> 
