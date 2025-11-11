@@ -85,7 +85,6 @@ async def mostrar_tablero(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse("tablero.html", {
         "request": request,
         "tablero": tablero,
-        "columnas": COLUMNAS_TABLERO,
     })
 
 
