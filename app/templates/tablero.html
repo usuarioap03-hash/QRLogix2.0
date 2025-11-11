@@ -6,24 +6,21 @@
     <title>Tablero - QRLogix</title>
     <link rel="icon" type="image/png" href="/static/imagenes/ARG_logo_ver_color_green_background.png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
             font-family: 'Montserrat', sans-serif;
-            margin: 0;
             background-color: #f4f6f9;
             color: #071D49;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            min-height: 98vh;
-            width: 100%;
-            overflow-x: hidden;
+            min-height: 100vh;
         }
 
         header {
@@ -38,113 +35,7 @@
             justify-content: center;
             gap: 0.75rem;
             position: relative;
-        }
-
-        .acciones-informe {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            width: 100%;
-            padding: 1rem 0 1rem;
-        }
-
-        .acciones-informe .rango-fecha {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #071D49;
-            font-weight: 600;
-        }
-
-        .acciones-informe .rango-fecha label {
-            margin-right: 0.25rem;
-        }
-
-        .acciones-informe input[type="date"] {
-            padding: 6px 8px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            font-size: 0.9rem;
-        }
-
-        .btn-descargar i {
-            margin-right: 0.5rem;
-        }
-
-        button {
-            background-color: #C4D600;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: 700;
-            cursor: pointer;
-            color: #071D49;
-        }
-
-        button:hover {
-            background-color: #b8c800;
-        }
-
-        .tablero {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            width: 100%;
-            margin-bottom: 2rem;
-            padding: 0 1rem;
-        }
-
-        .columna {
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            flex: 1;
-            min-width: 250px;
-            max-width: 300px;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .columna h2 {
-            text-align: center;
-            background-color: #071D49;
-            color: white;
-            border-radius: 6px;
-            padding: 8px;
-            margin-bottom: 10px;
-        }
-
-        .tarjeta {
-            background-color: #C4D600;
-            color: #071D49;
-            margin: 10px 0;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 700;
-            text-align: center;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .tarjeta--vacía {
-            background-color: #e5e9f0;
-            color: #56657b;
-            font-weight: 600;
-            justify-content: center;
-        }
-
-        .tiempo {
-            font-weight: 400;
-            font-size: 0.85rem;
-            color: #071D49;
-            opacity: 0.7;
-            margin-left: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .header-title {
@@ -170,6 +61,179 @@
             width: auto;
         }
 
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            width: 100%;
+            flex: 1;
+        }
+
+        .acciones-informe {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .rango-fecha {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #071D49;
+            font-weight: 600;
+            flex-wrap: wrap;
+        }
+
+        .rango-fecha label {
+            margin-right: 0.5rem;
+            font-weight: 700;
+        }
+
+        .rango-fecha input[type="date"] {
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 0.95rem;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        button {
+            background-color: #C4D600;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            color: #071D49;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background-color: #b8c800;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        button i {
+            font-size: 1.1rem;
+        }
+
+        .tablero {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .columna {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .columna:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .columna h2 {
+            text-align: center;
+            background-color: #071D49;
+            color: white;
+            border-radius: 10px 10px 0 0;
+            padding: 1rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .columna h2 i {
+            font-size: 1.3rem;
+        }
+
+        .columna-contenido {
+            padding: 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .tarjeta {
+            background-color: #C4D600;
+            color: #071D49;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tarjeta:hover {
+            background-color: #d4e610;
+            transform: translateX(4px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .tarjeta--vacía {
+            background-color: #e5e9f0;
+            color: #6c757d;
+            font-weight: 600;
+            justify-content: center;
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        .tarjeta--vacía:hover {
+            transform: none;
+            background-color: #e5e9f0;
+        }
+
+        .placa-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tiempo {
+            font-weight: 400;
+            font-size: 0.85rem;
+            color: #071D49;
+            opacity: 0.8;
+            white-space: nowrap;
+        }
+
+        .contador {
+            background-color: #C4D600;
+            color: #071D49;
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-left: 0.5rem;
+        }
+
         .icon-patio {
             color: #FF8C42;
         }
@@ -182,14 +246,120 @@
             color: #00ed37;
         }
 
+        .botones-navegacion {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-gestion {
+            background-color: #071D49;
+            color: white;
+            padding: 0.8rem 1.8rem;
+            font-size: 1rem;
+        }
+
+        .btn-gestion:hover {
+            background-color: #0a2a6b;
+        }
+
         footer {
             margin-top: auto;
             background-color: #071D49;
             color: white;
             width: 100%;
             text-align: center;
-            padding: 0.8rem;
-            font-size: 0.8rem;
+            padding: 1rem;
+            font-size: 0.85rem;
+        }
+
+        /* Auto-refresh indicator */
+        .refresh-indicator {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: #071D49;
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .refresh-indicator.visible {
+            opacity: 1;
+        }
+
+        .pulse {
+            width: 10px;
+            height: 10px;
+            background: #C4D600;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-title {
+                font-size: 1.2rem;
+            }
+
+            .header-logo {
+                min-width: 80px;
+            }
+
+            .header-logo img {
+                max-height: 35px;
+            }
+
+            .acciones-informe {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .rango-fecha {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .rango-fecha input[type="date"] {
+                width: 100%;
+            }
+
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .tablero {
+                grid-template-columns: 1fr;
+            }
+
+            .refresh-indicator {
+                bottom: 70px;
+                right: 10px;
+                font-size: 0.75rem;
+                padding: 0.6rem 1rem;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .tablero {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
     </style>
 </head>
@@ -197,79 +367,157 @@
     <header>
         <div class="header-title">
             <i class="fa-solid fa-square-poll-vertical" style="color: #c3d117;"></i>
-            Estado de Camiones
+            Estado de Camiones en Tiempo Real
         </div>
         <div class="header-logo">
             <img src="/static/imagenes/ARG_logo_hor_BN_no_background.png" alt="Argos Logo">
         </div>
     </header>
 
-    <div class="acciones-informe">
-        <div class="rango-fecha">
-            <label for="fechaInicio">Rango de fecha</label>
-            <input type="date" id="fechaInicio" name="fechaInicio" title="Fecha inicio">
-            <span>—</span>
-            <input type="date" id="fechaFin" name="fechaFin" title="Fecha fin">
+    <div class="container">
+        <div class="acciones-informe">
+            <div class="rango-fecha">
+                <label for="fechaInicio"><i class="fa-solid fa-calendar"></i> Rango de fecha</label>
+                <input type="date" id="fechaInicio" name="fechaInicio" title="Fecha inicio">
+                <span>—</span>
+                <input type="date" id="fechaFin" name="fechaFin" title="Fecha fin">
+            </div>
+            <button onclick="descargarInforme()">
+                <i class="fa-solid fa-download"></i>
+                Descargar informe Excel
+            </button>
         </div>
-        <button class="btn-descargar" onclick="descargarInforme()">
-            <i class="fa-solid fa-download"></i>
-            Descargar informe
-        </button>
+
+        <div class="tablero" id="tablero">
+            {% set iconos = {
+                'Patio': 'fa-hourglass-start icon-patio',
+                'Bodega': 'fa-boxes-stacked icon-bodega',
+                'Cargando': 'fa-truck-ramp-box icon-cargando'
+            } %}
+            {% for columna in ['Patio', 'Bodega', 'Cargando'] %}
+            <div class="columna" id="{{ columna }}">
+                <h2>
+                    <i class="fa-solid {{ iconos[columna] }}"></i> 
+                    {{ columna }}
+                    <span class="contador">{{ tablero[columna] | length }}</span>
+                </h2>
+                <div class="columna-contenido">
+                    {% if tablero[columna] %}
+                        {% for item in tablero[columna] %}
+                        <div class="tarjeta">
+                            <div class="placa-info">
+                                <i class="fa-solid fa-truck" style="opacity: 0.7;"></i>
+                                <span>{{ item.placa }}</span>
+                            </div>
+                            <span class="tiempo">{{ item.hora }}</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="tarjeta tarjeta--vacía">
+                            <i class="fa-solid fa-inbox" style="margin-right: 0.5rem;"></i>
+                            <span>Sin registros</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="botones-navegacion">
+            <button class="btn-gestion" onclick="window.location.href='/ciclos'">
+                <i class="fa-solid fa-gears"></i> 
+                Gestión manual de ciclos
+            </button>
+        </div>
     </div>
 
-    <div class="tablero" id="tablero">
-        {% set iconos = {
-            'Patio': 'fa-hourglass-start icon-patio',
-            'Bodega': 'fa-hourglass-start icon-bodega',
-            'Cargando': 'fa-truck-ramp-box icon-cargando'
-        } %}
-        {% for columna in ['Patio', 'Bodega', 'Cargando'] %}
-        <div class="columna" id="{{ columna }}">
-            <h2><i class="fa-solid {{ iconos[columna] }}"></i> {{ columna }} ({{ tablero[columna] | length }})</h2>
-            {% if tablero[columna] %}
-                {% for item in tablero[columna] %}
-                <div class="tarjeta">
-                    <span>{{ item.placa }}</span>
-                    <span class="tiempo">{{ item.hora }}</span>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="tarjeta tarjeta--vacía">
-                    <span>Sin registros</span>
-                </div>
-            {% endif %}
-        </div>
-        {% endfor %}
-    </div>
-    <div style="text-align:center; margin-bottom: 2rem;">
-        <button onclick="window.location.href='/ciclos'" style="background-color:#071D49; color:white; padding:12px 24px; border:none; border-radius:8px; font-weight:700; cursor:pointer;">
-            <i class="fa-solid fa-gear" style="margin-right:8px;"></i> Gestión manual de ciclos
-        </button>
+    <div class="refresh-indicator" id="refreshIndicator">
+        <div class="pulse"></div>
+        <span>Actualizando datos...</span>
     </div>
 
-    <footer>Argos Panamá - QRLogix</footer>
+    <footer>
+        <i class="fa-solid fa-copyright"></i> Argos Panamá - QRLogix | 
+        Sistema de Trazabilidad de Camiones
+    </footer>
 
     <script>
+        // Auto-refresh cada 30 segundos
+        let refreshInterval;
+        const REFRESH_TIME = 30000; // 30 segundos
+
+        function mostrarIndicadorRefresh() {
+            const indicator = document.getElementById('refreshIndicator');
+            indicator.classList.add('visible');
+            setTimeout(() => {
+                indicator.classList.remove('visible');
+            }, 2000);
+        }
+
+        function autoRefresh() {
+            mostrarIndicadorRefresh();
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        }
+
+        // Iniciar auto-refresh
+        function iniciarAutoRefresh() {
+            refreshInterval = setInterval(autoRefresh, REFRESH_TIME);
+        }
+
+        // Detener auto-refresh cuando el usuario interactúa
+        document.addEventListener('DOMContentLoaded', () => {
+            iniciarAutoRefresh();
+
+            // Pausar refresh al interactuar con el formulario
+            const inputs = document.querySelectorAll('input, button');
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    clearInterval(refreshInterval);
+                });
+                input.addEventListener('blur', () => {
+                    iniciarAutoRefresh();
+                });
+            });
+
+            // Establecer fecha actual como predeterminada
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fechaFin').value = hoy;
+            
+            // Establecer fecha de hace 7 días
+            const hace7Dias = new Date();
+            hace7Dias.setDate(hace7Dias.getDate() - 7);
+            document.getElementById('fechaInicio').value = hace7Dias.toISOString().split('T')[0];
+        });
+
         function descargarInforme() {
             const fechaInicio = document.getElementById('fechaInicio').value;
             const fechaFin = document.getElementById('fechaFin').value;
 
             if (!fechaInicio || !fechaFin) {
-                alert('Por favor, seleccione ambas fechas para descargar el informe.');
+                alert('⚠️ Por favor, seleccione ambas fechas para descargar el informe.');
                 return;
             }
 
             if (fechaInicio > fechaFin) {
-                alert('La fecha de inicio no puede ser mayor que la fecha fin.');
+                alert('⚠️ La fecha de inicio no puede ser mayor que la fecha fin.');
                 return;
             }
 
-            // Aquí se puede implementar la lógica para descargar el archivo .xlsx con los parámetros de fechas
-            // Por ejemplo, redirigir a una URL con query params o hacer una petición fetch para obtener el archivo.
-
-            // Ejemplo básico de redirección:
+            // Descargar informe
+            mostrarIndicadorRefresh();
             window.location.href = `/descargar_informe?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
         }
+
+        // Detectar cuando la página está oculta y pausar el refresh
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                clearInterval(refreshInterval);
+            } else {
+                iniciarAutoRefresh();
+            }
+        });
     </script>
 </body>
 </html>

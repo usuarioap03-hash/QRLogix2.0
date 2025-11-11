@@ -5,78 +5,295 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestión Manual de Ciclos - QRLogix</title>
   <link rel="icon" type="image/png" href="/static/imagenes/ARG_logo_ver_color_green_background.png" />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: 'Montserrat', sans-serif;
       background-color: #f4f6f9;
       color: #071D49;
-      margin: 0;
-      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-    h1 {
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-    table {
+
+    /* Header consistente con tablero.html */
+    header {
+      background-color: #071D49;
+      color: white;
       width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 1rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    th, td {
-      padding: 10px;
+
+    .header-title {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
       text-align: center;
-      border-bottom: 1px solid #ddd;
     }
-    th {
-      background-color: #C4D600;
-      color: #071D49;
+
+    .header-logo {
+      margin-left: auto;
+      min-width: 120px;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
     }
-    tr:hover {
-      background-color: #f1f1f1;
+
+    .header-logo img {
+      max-height: 50px;
+      width: auto;
     }
-    .form-section {
-      background: #fff;
-      margin-top: 20px;
-      padding: 15px;
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      flex: 1;
+    }
+
+    /* Sección de fecha */
+    .fecha-info {
+      text-align: center;
+      background: white;
+      padding: 1rem;
       border-radius: 8px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    label {
-      display: block;
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
       font-weight: 600;
-      margin-top: 10px;
+      color: #071D49;
     }
-    input, select, textarea {
-      width: 100%;
-      padding: 8px;
-      margin-top: 4px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-family: 'Montserrat', sans-serif;
-    }
-    textarea { resize: vertical; }
-    .buttons {
+
+    /* Barra de acciones múltiples */
+    .acciones-multiples {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
       display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
       justify-content: space-between;
-      margin-top: 15px;
     }
+
+    .seleccion-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-weight: 600;
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .contador-seleccion {
+      background: #C4D600;
+      color: #071D49;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
+    .botones-accion {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
     button {
-      padding: 10px 20px;
+      padding: 0.6rem 1.2rem;
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 700;
+      font-family: 'Montserrat', sans-serif;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-    .cerrar { background-color: #28a745; color: white; }
-    .eliminar { background-color: #dc3545; color: white; }
-    .cerrar:hover { background-color: #218838; }
-    .eliminar:hover { background-color: #c82333; }
 
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-eliminar-multiple {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .btn-eliminar-multiple:hover:not(:disabled) {
+      background-color: #c82333;
+    }
+
+    .btn-cerrar-multiple {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .btn-cerrar-multiple:hover:not(:disabled) {
+      background-color: #218838;
+    }
+
+    .btn-volver {
+      background-color: #071D49;
+      color: white;
+    }
+
+    .btn-volver:hover {
+      background-color: #0a2a6b;
+    }
+
+    /* Tabla mejorada */
+    .tabla-container {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    th {
+      background-color: #071D49;
+      color: white;
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    tbody tr {
+      transition: background-color 0.2s ease;
+    }
+
+    tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    tbody tr.seleccionada {
+      background-color: #fff3cd;
+    }
+
+    .checkbox-cell {
+      width: 50px;
+    }
+
+    .checkbox-cell input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    /* Formulario individual */
+    .form-section {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+
+    .form-section h2 {
+      color: #071D49;
+      margin-bottom: 1rem;
+      text-align: center;
+      font-size: 1.3rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-top: 1rem;
+      color: #071D49;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.8rem;
+      margin-top: 0.4rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+    }
+
+    textarea { 
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .buttons button {
+      flex: 1;
+    }
+
+    .cerrar { 
+      background-color: #28a745; 
+      color: white; 
+    }
+
+    .eliminar { 
+      background-color: #dc3545; 
+      color: white; 
+    }
+
+    .cerrar:hover { 
+      background-color: #218838; 
+    }
+
+    .eliminar:hover { 
+      background-color: #c82333; 
+    }
+
+    /* Estados visuales */
     .spinner {
       border: 4px solid #f3f3f3;
       border-top: 4px solid #C4D600;
@@ -88,32 +305,133 @@
       vertical-align: middle;
       margin-right: 8px;
     }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    .no-data {
+      text-align: center;
+      padding: 3rem;
+      color: #6c757d;
+      font-style: italic;
+    }
+
+    /* Footer */
+    footer {
+      background-color: #071D49;
+      color: white;
+      width: 100%;
+      text-align: center;
+      padding: 0.8rem;
+      font-size: 0.8rem;
+      margin-top: auto;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .acciones-multiples {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .seleccion-info {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .botones-accion {
+        flex-direction: column;
+      }
+
+      .botones-accion button {
+        width: 100%;
+      }
+
+      table {
+        font-size: 0.9rem;
+      }
+
+      th, td {
+        padding: 0.6rem 0.4rem;
+      }
+
+      .buttons {
+        flex-direction: column;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>Gestión Manual de Ciclos</h1>
+  <header>
+    <div class="header-title">
+      <i class="fa-solid fa-gears" style="color: #c3d117;"></i>
+      Gestión Manual de Ciclos
+    </div>
+    <div class="header-logo">
+      <img src="/static/imagenes/ARG_logo_hor_BN_no_background.png" alt="Argos Logo">
+    </div>
+  </header>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Placa</th>
-        <th>Puntos Escaneados</th>
-        <th>Inicio</th>
-        <th>Último Escaneo</th>
-        <th>Tiempo Total</th>
-      </tr>
-    </thead>
-    <tbody id="tabla-ciclos">
-      <tr><td colspan="5"><div class="spinner"></div>Cargando ciclos abiertos...</td></tr>
-    </tbody>
-  </table>
+  <div class="container">
+    <div class="fecha-info" id="fechaActual">
+      Cargando...
+    </div>
 
-  <div class="form-section">
-    <h2>Registrar acción manual</h2>
+    <!-- Barra de acciones múltiples -->
+    <div class="acciones-multiples">
+      <div class="seleccion-info">
+        <div class="checkbox-container">
+          <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+          <label for="selectAll" style="margin: 0; cursor: pointer;">Seleccionar todo</label>
+        </div>
+        <div class="contador-seleccion">
+          <span id="contadorSeleccion">0 seleccionados</span>
+        </div>
+      </div>
+      <div class="botones-accion">
+        <button class="btn-cerrar-multiple" id="btnCerrarMultiple" onclick="accionMultiple('cerrar')" disabled>
+          <i class="fa-solid fa-check"></i> Cerrar seleccionados
+        </button>
+        <button class="btn-eliminar-multiple" id="btnEliminarMultiple" onclick="accionMultiple('eliminar')" disabled>
+          <i class="fa-solid fa-trash"></i> Eliminar seleccionados
+        </button>
+        <button class="btn-volver" onclick="window.location.href='/tablero'">
+          <i class="fa-solid fa-arrow-left"></i> Volver al tablero
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabla de ciclos -->
+    <div class="tabla-container">
+      <table>
+        <thead>
+          <tr>
+            <th class="checkbox-cell">
+              <i class="fa-solid fa-list-check"></i>
+            </th>
+            <th>Placa</th>
+            <th>Puntos Escaneados</th>
+            <th>Inicio</th>
+            <th>Último Escaneo</th>
+            <th>Tiempo Total</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-ciclos">
+          <tr>
+            <td colspan="6">
+              <div class="spinner"></div>
+              Cargando ciclos abiertos...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Formulario individual -->
+    <div class="form-section">
+      <h2><i class="fa-solid fa-edit"></i> Registrar acción individual</h2>
       <form id="formCiclo">
         <label for="placa">Placa</label>
         <select id="placa" name="placa" required>
@@ -132,53 +450,80 @@
         </select>
 
         <label for="detalles">Detalles (opcional)</label>
-        <textarea id="detalles" name="detalles" rows="3"></textarea>
+        <textarea id="detalles" name="detalles" placeholder="Información adicional..."></textarea>
 
         <label for="registrado_por">Registrado por</label>
-        <input type="text" id="registrado_por" name="registrado_por" required placeholder="Ej: logística">
+        <input type="text" id="registrado_por" name="registrado_por" required placeholder="Ej: Juan Pérez - Logística">
 
         <div class="buttons">
-          <button type="button" class="cerrar" onclick="accionManual('cerrar')">Cerrar viaje</button>
-          <button type="button" class="eliminar" onclick="accionManual('eliminar')">Eliminar ciclo</button>
+          <button type="button" class="cerrar" onclick="accionManual('cerrar')">
+            <i class="fa-solid fa-check"></i> Cerrar viaje
+          </button>
+          <button type="button" class="eliminar" onclick="accionManual('eliminar')">
+            <i class="fa-solid fa-trash"></i> Eliminar ciclo
+          </button>
         </div>
       </form>
+    </div>
   </div>
 
+  <footer>Argos Panamá - QRLogix</footer>
+
   <script>
+  let ciclosData = [];
+  const placasSeleccionadas = new Set();
+
+  // Actualizar fecha actual
+  function actualizarFecha() {
+    const meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+    const dias = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+    const ahora = new Date();
+    const fechaStr = `${dias[ahora.getDay()]} ${ahora.getDate()} ${meses[ahora.getMonth()]}`.toUpperCase();
+    document.getElementById("fechaActual").textContent = fechaStr;
+  }
+
+  // Cargar ciclos
   document.addEventListener("DOMContentLoaded", async () => {
+    actualizarFecha();
     const tabla = document.getElementById("tabla-ciclos");
     const selectPlaca = document.getElementById("placa");
 
     try {
       const res = await fetch("/api/ciclos");
       const data = await res.json();
+      ciclosData = data;
       tabla.innerHTML = "";
 
-      // 🧾 Si no hay ciclos
       if (data.length === 0) {
-        tabla.innerHTML = `<tr><td colspan="5">No hay ciclos abiertos actualmente.</td></tr>`;
+        tabla.innerHTML = `<tr><td colspan="6" class="no-data">
+          <i class="fa-solid fa-inbox" style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 1rem;"></i>
+          No hay ciclos abiertos actualmente
+        </td></tr>`;
         selectPlaca.innerHTML = `<option value="">No hay placas activas</option>`;
         return;
       }
 
-      // 🧱 Construir tabla
       const placasUnicas = new Set();
-      data.forEach(c => {
+      data.forEach((c, index) => {
         const fila = document.createElement("tr");
+        fila.dataset.index = index;
+        fila.dataset.placa = c.placa;
         fila.innerHTML = `
-          <td>${c.placa}</td>
+          <td class="checkbox-cell">
+            <input type="checkbox" class="checkbox-placa" data-placa="${c.placa}" onchange="actualizarSeleccion()">
+          </td>
+          <td><strong>${c.placa}</strong></td>
           <td>${c.puntos_escaneados}</td>
           <td>${c.inicio}</td>
           <td>${c.ultimo_escaneo}</td>
-          <td>${c.minutos_transcurridos}</td>
+          <td><strong>${c.minutos_transcurridos}</strong></td>
         `;
         tabla.appendChild(fila);
         placasUnicas.add(c.placa);
       });
 
-      // 🚗 Rellenar lista de placas
       selectPlaca.innerHTML = `<option value="">Seleccionar placa...</option>`;
-      [...placasUnicas].forEach(placa => {
+      [...placasUnicas].sort().forEach(placa => {
         const opt = document.createElement("option");
         opt.value = placa;
         opt.textContent = placa;
@@ -187,11 +532,101 @@
 
     } catch (err) {
       console.error("Error al cargar ciclos:", err);
-      tabla.innerHTML = `<tr><td colspan="5">Error al cargar los ciclos 🚫</td></tr>`;
+      tabla.innerHTML = `<tr><td colspan="6" class="no-data">
+        <i class="fa-solid fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; display: block; margin-bottom: 1rem;"></i>
+        Error al cargar los ciclos
+      </td></tr>`;
       selectPlaca.innerHTML = `<option value="">Error al cargar placas</option>`;
     }
   });
 
+  // Seleccionar/deseleccionar todos
+  function toggleSelectAll() {
+    const selectAll = document.getElementById("selectAll");
+    const checkboxes = document.querySelectorAll(".checkbox-placa");
+    checkboxes.forEach(cb => {
+      cb.checked = selectAll.checked;
+    });
+    actualizarSeleccion();
+  }
+
+  // Actualizar contador y botones
+  function actualizarSeleccion() {
+    placasSeleccionadas.clear();
+    const checkboxes = document.querySelectorAll(".checkbox-placa:checked");
+    checkboxes.forEach(cb => {
+      placasSeleccionadas.add(cb.dataset.placa);
+      const fila = cb.closest("tr");
+      fila.classList.add("seleccionada");
+    });
+
+    document.querySelectorAll(".checkbox-placa:not(:checked)").forEach(cb => {
+      const fila = cb.closest("tr");
+      fila.classList.remove("seleccionada");
+    });
+
+    const contador = placasSeleccionadas.size;
+    document.getElementById("contadorSeleccion").textContent = `${contador} seleccionado${contador !== 1 ? 's' : ''}`;
+    
+    const btnCerrar = document.getElementById("btnCerrarMultiple");
+    const btnEliminar = document.getElementById("btnEliminarMultiple");
+    btnCerrar.disabled = contador === 0;
+    btnEliminar.disabled = contador === 0;
+
+    const selectAll = document.getElementById("selectAll");
+    const totalCheckboxes = document.querySelectorAll(".checkbox-placa").length;
+    selectAll.checked = contador === totalCheckboxes && totalCheckboxes > 0;
+  }
+
+  // Acción múltiple
+  async function accionMultiple(tipo) {
+    if (placasSeleccionadas.size === 0) return;
+
+    const accionTexto = tipo === 'cerrar' ? 'cerrar' : 'eliminar';
+    const motivo = prompt(`¿Motivo para ${accionTexto} ${placasSeleccionadas.size} ciclo(s)?`);
+    if (!motivo) return;
+
+    const registradoPor = prompt("¿Registrado por? (nombre y área)");
+    if (!registradoPor) return;
+
+    const detalles = prompt("Detalles adicionales (opcional)") || "";
+
+    const confirmacion = confirm(`¿Confirmar ${accionTexto} de ${placasSeleccionadas.size} ciclo(s)?`);
+    if (!confirmacion) return;
+
+    let exitosos = 0;
+    let fallidos = 0;
+
+    for (const placa of placasSeleccionadas) {
+      try {
+        const res = await fetch("/ciclos/accion", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            placa: placa,
+            motivo: motivo,
+            detalles: detalles,
+            registrado_por: registradoPor,
+            accion: tipo
+          })
+        });
+
+        if (res.ok) {
+          exitosos++;
+        } else {
+          fallidos++;
+        }
+      } catch (err) {
+        console.error(`Error al procesar ${placa}:`, err);
+        fallidos++;
+      }
+    }
+
+    alert(`Proceso completado:\n✅ ${exitosos} exitoso(s)\n❌ ${fallidos} fallido(s)`);
+    location.reload();
+  }
+
+  // Acción individual
   async function accionManual(tipo) {
     const data = {
       placa: document.getElementById("placa").value,
@@ -206,19 +641,28 @@
       return;
     }
 
-    const res = await fetch("/ciclos/accion", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
+    const confirmacion = confirm(`¿Confirmar ${tipo === 'cerrar' ? 'cierre' : 'eliminación'} del ciclo de ${data.placa}?`);
+    if (!confirmacion) return;
 
-    if (res.ok) {
-      alert(`Ciclo ${tipo === 'cerrar' ? 'cerrado' : 'eliminado'} correctamente ✅`);
-      location.reload();
-    } else {
-      alert("Error al procesar la acción ❌");
+    try {
+      const res = await fetch("/ciclos/accion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      if (res.ok) {
+        alert(`✅ Ciclo ${tipo === 'cerrar' ? 'cerrado' : 'eliminado'} correctamente`);
+        location.reload();
+      } else {
+        const error = await res.json();
+        alert(`❌ Error: ${error.error || 'No se pudo procesar la acción'}`);
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      alert("❌ Error de conexión");
     }
   }
-</script>
+  </script>
 </body>
 </html>
