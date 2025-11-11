@@ -6,7 +6,6 @@ from app.database import get_db
 from app import crud
 from app.utils.timezone import ahora_panama, formatear_hora_panama
 import uuid
-import random
 from app import config
 from app.logic.mensajes import obtener_mensaje
 from app.logic.gestion_ciclos import eliminar_ciclo_incompleto
@@ -138,7 +137,7 @@ async def scan_qr(request: Request, punto: str, db: Session = Depends(get_db)):
         "hora": formatear_hora_panama(escaneo.fecha_hora),
         "puntos": puntos_list,
         "estados": estados,
-        "nombres": {"punto1": "Patio", "punto2": "Bodega", "punto3": "Carga", "punto4": "Lona", "punto5": "Salida"},
+        "nombres": {"punto1": "Patio", "punto2": "Pre-Carga", "punto3": "Cargando", "punto4": "Lona", "punto5": "Salida"},
         "modo": modo,
         "mensaje_titulo": seleccionado["titulo"],
         "mensaje_texto": seleccionado["texto"],

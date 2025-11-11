@@ -7,10 +7,22 @@ from app.database import get_db
 from app.utils.timezone import formatear_hora_panama, ahora_panama, convertir_a_panama
 from fastapi.templating import Jinja2Templates
 from datetime import datetime
-import locale
+from typing import List, Optional
+from pydantic import BaseModel
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
+
+# ======================================================
+# 🔹 MODELOS PYDANTIC PARA VALIDACIÓN
+# ======================================================
+class AccionCicloRequest(BaseModel):
+    placa: Optional[str] = None
+    placas: Optional[List[str]] = None  # Para acciones múltiples
+    motivo: str
+    detalles: Optional[str] = ""
+    registrado_por: str
+    accion: str  # "cerrar" o "eliminar"
 
 # ======================================================
 # 🧭 VISTA PRINCIPAL DE CICLOS ABIERTOS (HTML)
@@ -84,17 +96,71 @@ async def obtener_ciclos_abiertos(db: Session = Depends(get_db)):
     return JSONResponse(content=ciclos)
 
 # ======================================================
-# ⚙️ REGISTRO MANUAL (CERRAR O ELIMINAR)
+# ⚙️ REGISTRO MANUAL (CERRAR O ELIMINAR) - OPTIMIZADO
 # ======================================================
 @router.post("/ciclos/accion")
 async def accion_manual(request: Request, db: Session = Depends(get_db)):
-    data = await request.json()
-    placa = data.get("placa")
-    motivo = data.get("motivo")
-    detalles = data.get("detalles")
-    registrado_por = data.get("registrado_por")
-    accion = data.get("accion")
+    try:
+        data = await request.json()
+        
+        # Validar datos básicos
+        motivo = data.get("motivo")
+        detalles = data.get("detalles", "")
+        registrado_por = data.get("registrado_por")
+        accion = data.get("accion")
+        
+        if not motivo or not registrado_por or not accion:
+            return JSONResponse(
+                status_code=400, 
+                content={"error": "Faltan campos obligatorios: motivo, registrado_por o acción"}
+            )
+        
+        if accion not in ["cerrar", "eliminar"]:
+            return JSONResponse(
+                status_code=400, 
+                content={"error": "Acción no válida. Debe ser 'cerrar' o 'eliminar'"}
+            )
+        
+        # Determinar si es acción individual o múltiple
+        placas = data.get("placas")  # Lista de placas para acción múltiple
+        placa_individual = data.get("placa")  # Placa individual
+        
+        if placas and isinstance(placas, list):
+            # 🔹 ACCIÓN MÚLTIPLE
+            return await procesar_accion_multiple(
+                db, placas, motivo, detalles, registrado_por, accion
+            )
+        elif placa_individual:
+            # 🔹 ACCIÓN INDIVIDUAL
+            return await procesar_accion_individual(
+                db, placa_individual, motivo, detalles, registrado_por, accion
+            )
+        else:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Debe proporcionar 'placa' o 'placas'"}
+            )
+            
+    except Exception as e:
+        print(f"❌ Error en accion_manual: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Error interno del servidor: {str(e)}"}
+        )
 
+# ======================================================
+# 🔧 FUNCIÓN AUXILIAR: PROCESAR ACCIÓN INDIVIDUAL
+# ======================================================
+async def procesar_accion_individual(
+    db: Session, 
+    placa: str, 
+    motivo: str, 
+    detalles: str, 
+    registrado_por: str, 
+    accion: str
+):
+    """Procesa cerrar o eliminar un ciclo individual"""
+    
     # Verificar ciclo activo mediante la vista
     ciclo = db.execute(text("""
         SELECT sesion_id, ciclo_id 
@@ -105,50 +171,176 @@ async def accion_manual(request: Request, db: Session = Depends(get_db)):
     """), {"placa": placa}).fetchone()
 
     if not ciclo:
-        return JSONResponse(status_code=404, content={"error": "No se encontró ciclo abierto para esa placa."})
+        return JSONResponse(
+            status_code=404, 
+            content={"error": f"No se encontró ciclo abierto para la placa {placa}"}
+        )
 
-    # Acción: eliminar ciclo
-    if accion == "eliminar":
-        db.execute(text("""
-            DELETE FROM escaneos WHERE ciclo_id = :cid;
-            DELETE FROM ciclos WHERE id = :cid;
-        """), {"cid": ciclo.ciclo_id})
-        db.execute(text("""
-            INSERT INTO ciclo_manual 
-            (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
-            VALUES (:placa, NOW(), :motivo, CAST(:detalles AS jsonb), :sid, :cid, :registrado_por);
-        """), {
-            "placa": placa,
-            "motivo": motivo,
-            "detalles": detalles or "{}",
-            "sid": ciclo.sesion_id,
-            "cid": ciclo.ciclo_id,
-            "registrado_por": registrado_por
-        })
-        db.commit()
-        print(f"❌ Ciclo eliminado manualmente: {placa} ({motivo}) — {registrado_por}")
-        return JSONResponse(content={"success": True, "msg": "Ciclo eliminado correctamente."})
+    try:
+        if accion == "eliminar":
+            # Eliminar escaneos y ciclo
+            db.execute(text("""
+                DELETE FROM escaneos WHERE ciclo_id = :cid;
+            """), {"cid": ciclo.ciclo_id})
+            
+            db.execute(text("""
+                DELETE FROM ciclos WHERE id = :cid;
+            """), {"cid": ciclo.ciclo_id})
+            
+            # Registrar en ciclo_manual
+            db.execute(text("""
+                INSERT INTO ciclo_manual 
+                (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
+                VALUES (:placa, NOW(), :motivo, CAST(:detalles AS jsonb), :sid, :cid, :registrado_por);
+            """), {
+                "placa": placa,
+                "motivo": motivo,
+                "detalles": detalles or "{}",
+                "sid": ciclo.sesion_id,
+                "cid": ciclo.ciclo_id,
+                "registrado_por": registrado_por
+            })
+            
+            db.commit()
+            print(f"❌ Ciclo eliminado manualmente: {placa} ({motivo}) — {registrado_por}")
+            
+            return JSONResponse(content={
+                "success": True, 
+                "msg": f"Ciclo de {placa} eliminado correctamente",
+                "placa": placa,
+                "accion": "eliminado"
+            })
 
-    # Acción: cerrar ciclo
-    elif accion == "cerrar":
-        db.execute(text("""
-            UPDATE ciclos SET completado = TRUE, fin = NOW() WHERE id = :cid;
-        """), {"cid": ciclo.ciclo_id})
-        db.execute(text("""
-            INSERT INTO ciclo_manual 
-            (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
-            VALUES (:placa, NOW(), :motivo, CAST(:detalles AS jsonb), :sid, :cid, :registrado_por);
-        """), {
-            "placa": placa,
-            "motivo": motivo,
-            "detalles": detalles or "{}",
-            "sid": ciclo.sesion_id,
-            "cid": ciclo.ciclo_id,
-            "registrado_por": registrado_por
-        })
-        db.commit()
-        print(f"✅ Ciclo cerrado manualmente: {placa} ({motivo}) — {registrado_por}")
-        return JSONResponse(content={"success": True, "msg": "Ciclo cerrado correctamente."})
+        elif accion == "cerrar":
+            # Cerrar ciclo
+            db.execute(text("""
+                UPDATE ciclos SET completado = TRUE, fin = NOW() WHERE id = :cid;
+            """), {"cid": ciclo.ciclo_id})
+            
+            # Registrar en ciclo_manual
+            db.execute(text("""
+                INSERT INTO ciclo_manual 
+                (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
+                VALUES (:placa, NOW(), :motivo, CAST(:detalles AS jsonb), :sid, :cid, :registrado_por);
+            """), {
+                "placa": placa,
+                "motivo": motivo,
+                "detalles": detalles or "{}",
+                "sid": ciclo.sesion_id,
+                "cid": ciclo.ciclo_id,
+                "registrado_por": registrado_por
+            })
+            
+            db.commit()
+            print(f"✅ Ciclo cerrado manualmente: {placa} ({motivo}) — {registrado_por}")
+            
+            return JSONResponse(content={
+                "success": True, 
+                "msg": f"Ciclo de {placa} cerrado correctamente",
+                "placa": placa,
+                "accion": "cerrado"
+            })
+            
+    except Exception as e:
+        db.rollback()
+        print(f"❌ Error al procesar {placa}: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Error al procesar {placa}: {str(e)}"}
+        )
 
-    else:
-        return JSONResponse(status_code=400, content={"error": "Acción no válida."})
+# ======================================================
+# 🔧 FUNCIÓN AUXILIAR: PROCESAR ACCIÓN MÚLTIPLE
+# ======================================================
+async def procesar_accion_multiple(
+    db: Session, 
+    placas: List[str], 
+    motivo: str, 
+    detalles: str, 
+    registrado_por: str, 
+    accion: str
+):
+    """Procesa cerrar o eliminar múltiples ciclos"""
+    
+    resultados = {
+        "exitosos": [],
+        "fallidos": [],
+        "total": len(placas)
+    }
+    
+    for placa in placas:
+        try:
+            # Verificar ciclo activo
+            ciclo = db.execute(text("""
+                SELECT sesion_id, ciclo_id 
+                FROM ciclos_abiertos 
+                WHERE placa = :placa 
+                ORDER BY ultimo_escaneo DESC 
+                LIMIT 1;
+            """), {"placa": placa}).fetchone()
+
+            if not ciclo:
+                resultados["fallidos"].append({
+                    "placa": placa,
+                    "error": "No se encontró ciclo abierto"
+                })
+                continue
+
+            if accion == "eliminar":
+                # Eliminar escaneos y ciclo
+                db.execute(text("DELETE FROM escaneos WHERE ciclo_id = :cid"), {"cid": ciclo.ciclo_id})
+                db.execute(text("DELETE FROM ciclos WHERE id = :cid"), {"cid": ciclo.ciclo_id})
+                
+                # Registrar en ciclo_manual
+                db.execute(text("""
+                    INSERT INTO ciclo_manual 
+                    (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
+                    VALUES (:placa, NOW(), :motivo, CAST(:detalles AS jsonb), :sid, :cid, :registrado_por);
+                """), {
+                    "placa": placa,
+                    "motivo": motivo,
+                    "detalles": detalles or "{}",
+                    "sid": ciclo.sesion_id,
+                    "cid": ciclo.ciclo_id,
+                    "registrado_por": registrado_por
+                })
+                
+                db.commit()
+                print(f"❌ Ciclo eliminado (múltiple): {placa} ({motivo}) — {registrado_por}")
+                resultados["exitosos"].append({"placa": placa, "accion": "eliminado"})
+
+            elif accion == "cerrar":
+                # Cerrar ciclo
+                db.execute(text("UPDATE ciclos SET completado = TRUE, fin = NOW() WHERE id = :cid"), {"cid": ciclo.ciclo_id})
+                
+                # Registrar en ciclo_manual
+                db.execute(text("""
+                    INSERT INTO ciclo_manual 
+                    (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
+                    VALUES (:placa, NOW(), :motivo, CAST(:detalles AS jsonb), :sid, :cid, :registrado_por);
+                """), {
+                    "placa": placa,
+                    "motivo": motivo,
+                    "detalles": detalles or "{}",
+                    "sid": ciclo.sesion_id,
+                    "cid": ciclo.ciclo_id,
+                    "registrado_por": registrado_por
+                })
+                
+                db.commit()
+                print(f"✅ Ciclo cerrado (múltiple): {placa} ({motivo}) — {registrado_por}")
+                resultados["exitosos"].append({"placa": placa, "accion": "cerrado"})
+
+        except Exception as e:
+            db.rollback()
+            print(f"❌ Error al procesar {placa}: {e}")
+            resultados["fallidos"].append({
+                "placa": placa,
+                "error": str(e)
+            })
+    
+    return JSONResponse(content={
+        "success": True,
+        "msg": f"Procesados {len(resultados['exitosos'])} de {resultados['total']} ciclos",
+        "resultados": resultados
+    })

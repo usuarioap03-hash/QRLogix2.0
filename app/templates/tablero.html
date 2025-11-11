@@ -238,7 +238,7 @@
             color: #FF8C42;
         }
 
-        .icon-bodega {
+        .icon-pre-carga {
             color: #01b3ff;
         }
 
@@ -390,11 +390,11 @@
 
         <div class="tablero" id="tablero">
             {% set iconos = {
-                'Patio': 'fa-hourglass-start icon-patio',
-                'Bodega': 'fa-boxes-stacked icon-bodega',
+                'Espera': 'fa-hourglass-start icon-patio',
+                'Pre-Carga': 'fa-boxes-stacked icon-pre-carga',
                 'Cargando': 'fa-truck-ramp-box icon-cargando'
             } %}
-            {% for columna in ['Patio', 'Bodega', 'Cargando'] %}
+            {% for columna in ['Patio', 'Pre-Carga', 'Cargando'] %}
             <div class="columna" id="{{ columna }}">
                 <h2>
                     <i class="fa-solid {{ iconos[columna] }}"></i> 
@@ -437,7 +437,7 @@
     </div>
 
     <footer>
-        <i class="fa-solid fa-copyright"></i> Argos Panamá - QRLogix | 
+        Argos Panamá - QRLogix | 
         Sistema de Trazabilidad de Camiones
     </footer>
 

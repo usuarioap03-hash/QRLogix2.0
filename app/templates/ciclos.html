@@ -578,90 +578,51 @@
     selectAll.checked = contador === totalCheckboxes && totalCheckboxes > 0;
   }
 
-  // Acción múltiple
+  // Acción múltiple OPTIMIZADA
   async function accionMultiple(tipo) {
-    if (placasSeleccionadas.size === 0) return;
+      if (placasSeleccionadas.size === 0) return;
 
-    const accionTexto = tipo === 'cerrar' ? 'cerrar' : 'eliminar';
-    const motivo = prompt(`¿Motivo para ${accionTexto} ${placasSeleccionadas.size} ciclo(s)?`);
-    if (!motivo) return;
+      const accionTexto = tipo === 'cerrar' ? 'cerrar' : 'eliminar';
+      const motivo = prompt(`¿Motivo para ${accionTexto} ${placasSeleccionadas.size} ciclo(s)?`);
+      if (!motivo) return;
 
-    const registradoPor = prompt("¿Registrado por? (nombre y área)");
-    if (!registradoPor) return;
+      const registradoPor = prompt("¿Registrado por? (nombre y área)");
+      if (!registradoPor) return;
 
-    const detalles = prompt("Detalles adicionales (opcional)") || "";
+      const detalles = prompt("Detalles adicionales (opcional)") || "";
 
-    const confirmacion = confirm(`¿Confirmar ${accionTexto} de ${placasSeleccionadas.size} ciclo(s)?`);
-    if (!confirmacion) return;
+      const confirmacion = confirm(`¿Confirmar ${accionTexto} de ${placasSeleccionadas.size} ciclo(s)?`);
+      if (!confirmacion) return;
 
-    let exitosos = 0;
-    let fallidos = 0;
-
-    for (const placa of placasSeleccionadas) {
       try {
-        const res = await fetch("/ciclos/accion", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            placa: placa,
-            motivo: motivo,
-            detalles: detalles,
-            registrado_por: registradoPor,
-            accion: tipo
-          })
-        });
+          // 🔹 ENVIAR TODAS LAS PLACAS EN UNA SOLA PETICIÓN
+          const res = await fetch("/ciclos/accion", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                  placas: Array.from(placasSeleccionadas),  // Array de placas
+                  motivo: motivo,
+                  detalles: detalles,
+                  registrado_por: registradoPor,
+                  accion: tipo
+              })
+          });
 
-        if (res.ok) {
-          exitosos++;
-        } else {
-          fallidos++;
-        }
+          if (res.ok) {
+              const data = await res.json();
+              const exitosos = data.resultados.exitosos.length;
+              const fallidos = data.resultados.fallidos.length;
+              
+              alert(`Proceso completado:\n✅ ${exitosos} exitoso(s)\n❌ ${fallidos} fallido(s)`);
+              location.reload();
+          } else {
+              const error = await res.json();
+              alert(`❌ Error: ${error.error || 'No se pudo procesar la acción'}`);
+          }
       } catch (err) {
-        console.error(`Error al procesar ${placa}:`, err);
-        fallidos++;
+          console.error("Error:", err);
+          alert("❌ Error de conexión");
       }
-    }
-
-    alert(`Proceso completado:\n✅ ${exitosos} exitoso(s)\n❌ ${fallidos} fallido(s)`);
-    location.reload();
-  }
-
-  // Acción individual
-  async function accionManual(tipo) {
-    const data = {
-      placa: document.getElementById("placa").value,
-      motivo: document.getElementById("motivo").value,
-      detalles: document.getElementById("detalles").value,
-      registrado_por: document.getElementById("registrado_por").value.trim(),
-      accion: tipo
-    };
-
-    if (!data.placa || !data.motivo || !data.registrado_por) {
-      alert("Por favor completa todos los campos obligatorios ⚠️");
-      return;
-    }
-
-    const confirmacion = confirm(`¿Confirmar ${tipo === 'cerrar' ? 'cierre' : 'eliminación'} del ciclo de ${data.placa}?`);
-    if (!confirmacion) return;
-
-    try {
-      const res = await fetch("/ciclos/accion", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      });
-
-      if (res.ok) {
-        alert(`✅ Ciclo ${tipo === 'cerrar' ? 'cerrado' : 'eliminado'} correctamente`);
-        location.reload();
-      } else {
-        const error = await res.json();
-        alert(`❌ Error: ${error.error || 'No se pudo procesar la acción'}`);
-      }
-    } catch (err) {
-      console.error("Error:", err);
-      alert("❌ Error de conexión");
-    }
   }
   </script>
 </body>
