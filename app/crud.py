@@ -49,9 +49,24 @@ def get_ciclo_activo(db: Session, sesion_id: int):
         models.Ciclo.completado == False
     ).order_by(models.Ciclo.id.desc()).first()
 
- # Escaneos
-def create_escaneo(db: Session, ciclo_id: int, punto: str, device_cookie=None):
+# Escaneos
+def create_escaneo(
+    db: Session,
+    ciclo_id: int,
+    punto: str,
+    device_cookie: str | None = None
+):
+    """
+    Crea un escaneo para un ciclo y punto.
+
+    - Evita duplicar el mismo punto en el mismo ciclo si ya hubo uno
+      en los últimos 60 minutos.
+    - El parámetro device_cookie se acepta por compatibilidad,
+      pero **NO** se guarda en la tabla escaneos, porque el modelo
+      Escaneo no tiene esa columna.
+    """
     hace_60_min = ahora_panama() - timedelta(minutes=60)
+
     ultimo = (
         db.query(models.Escaneo)
         .filter(
@@ -63,21 +78,15 @@ def create_escaneo(db: Session, ciclo_id: int, punto: str, device_cookie=None):
     )
 
     if ultimo and ultimo.fecha_hora >= hace_60_min:
+        # Ya hay un escaneo reciente de este mismo punto en este ciclo → no duplicamos
         return ultimo
 
-    if device_cookie is not None:
-        escaneo = models.Escaneo(
-            ciclo_id=ciclo_id,
-            punto=punto,
-            fecha_hora=ahora_panama(),
-            device_cookie=device_cookie
-        )
-    else:
-        escaneo = models.Escaneo(
-            ciclo_id=ciclo_id,
-            punto=punto,
-            fecha_hora=ahora_panama()
-        )
+    escaneo = models.Escaneo(
+        ciclo_id=ciclo_id,
+        punto=punto,
+        fecha_hora=ahora_panama()
+        # 👈 IMPORTANTE: aquí NO va device_cookie
+    )
     db.add(escaneo)
     db.commit()
     db.refresh(escaneo)
