@@ -191,11 +191,11 @@ async def procesar_accion_individual(
             db.execute(text("""
                 INSERT INTO ciclo_manual 
                 (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
-                VALUES (:placa, NOW(), :motivo, CAST(:detalles AS jsonb), :sid, :cid, :registrado_por);
+                VALUES (:placa, NOW(), :motivo, :detalles, :sid, :cid, :registrado_por);
             """), {
                 "placa": placa,
                 "motivo": motivo,
-                "detalles": detalles or "{}",
+                "detalles": detalles or '',
                 "sid": ciclo.sesion_id,
                 "cid": ciclo.ciclo_id,
                 "registrado_por": registrado_por
@@ -221,11 +221,11 @@ async def procesar_accion_individual(
             db.execute(text("""
                 INSERT INTO ciclo_manual 
                 (placa, fecha_eliminacion, motivo, detalles, sesion_id, ciclo_id, registrado_por)
-                VALUES (:placa, NOW(), :motivo, CAST(:detalles AS jsonb), :sid, :cid, :registrado_por);
+                VALUES (:placa, NOW(), :motivo, :detalles, :sid, :cid, :registrado_por);
             """), {
                 "placa": placa,
                 "motivo": motivo,
-                "detalles": detalles or "{}",
+                "detalles": detalles or '',
                 "sid": ciclo.sesion_id,
                 "cid": ciclo.ciclo_id,
                 "registrado_por": registrado_por
