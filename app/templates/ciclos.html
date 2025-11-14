@@ -471,7 +471,7 @@
 
   <script>
   let ciclosData = [];
-  const placasSeleccionadas = new Set();
+  let placasSeleccionadas = [];
 
   // Actualizar fecha actual
   function actualizarFecha() {
@@ -552,20 +552,20 @@
 
   // Actualizar contador y botones
   function actualizarSeleccion() {
-    placasSeleccionadas.clear();
-    const checkboxes = document.querySelectorAll(".checkbox-placa:checked");
+    placasSeleccionadas = [];
+    const checkboxes = document.querySelectorAll(".checkbox-placa");
+
     checkboxes.forEach(cb => {
-      placasSeleccionadas.add(cb.dataset.placa);
       const fila = cb.closest("tr");
-      fila.classList.add("seleccionada");
+      if (cb.checked) {
+        placasSeleccionadas.push(cb.dataset.placa);
+        fila.classList.add("seleccionada");
+      } else {
+        fila.classList.remove("seleccionada");
+      }
     });
 
-    document.querySelectorAll(".checkbox-placa:not(:checked)").forEach(cb => {
-      const fila = cb.closest("tr");
-      fila.classList.remove("seleccionada");
-    });
-
-    const contador = placasSeleccionadas.size;
+    const contador = placasSeleccionadas.length;
     document.getElementById("contadorSeleccion").textContent = `${contador} seleccionado${contador !== 1 ? 's' : ''}`;
     
     const btnCerrar = document.getElementById("btnCerrarMultiple");
@@ -574,16 +574,16 @@
     btnEliminar.disabled = contador === 0;
 
     const selectAll = document.getElementById("selectAll");
-    const totalCheckboxes = document.querySelectorAll(".checkbox-placa").length;
+    const totalCheckboxes = checkboxes.length;
     selectAll.checked = contador === totalCheckboxes && totalCheckboxes > 0;
   }
 
   // Acción múltiple OPTIMIZADA
   async function accionMultiple(tipo) {
-      if (placasSeleccionadas.size === 0) return;
+      if (placasSeleccionadas.length === 0) return;
 
       const accionTexto = tipo === 'cerrar' ? 'cerrar' : 'eliminar';
-      const motivo = prompt(`¿Motivo para ${accionTexto} ${placasSeleccionadas.size} ciclo(s)?`);
+      const motivo = prompt(`¿Motivo para ${accionTexto} ${placasSeleccionadas.length} ciclo(s)?`);
       if (!motivo) return;
 
       const registradoPor = prompt("¿Registrado por? (nombre)");
@@ -591,7 +591,7 @@
 
       const detalles = prompt("Detalles adicionales (opcional)") || "";
 
-      const confirmacion = confirm(`¿Confirmar ${accionTexto} de ${placasSeleccionadas.size} ciclo(s)?`);
+      const confirmacion = confirm(`¿Confirmar ${accionTexto} de ${placasSeleccionadas.length} ciclo(s)?`);
       if (!confirmacion) return;
 
       try {
@@ -600,7 +600,7 @@
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                  placas: Array.from(placasSeleccionadas),  // Array de placas
+                  placas: placasSeleccionadas,  // Array de placas
                   motivo: motivo,
                   detalles: detalles,
                   registrado_por: registradoPor,
@@ -614,6 +614,50 @@
               const fallidos = data.resultados.fallidos.length;
               
               alert(`Proceso completado:\n✅ ${exitosos} exitoso(s)\n❌ ${fallidos} fallido(s)`);
+              location.reload();
+          } else {
+              const error = await res.json();
+              alert(`❌ Error: ${error.error || 'No se pudo procesar la acción'}`);
+          }
+      } catch (err) {
+          console.error("Error:", err);
+          alert("❌ Error de conexión");
+      }
+  }
+
+  // Acción individual desde el formulario
+  async function accionManual(tipo) {
+      const placa = document.getElementById("placa").value.trim();
+      const motivo = document.getElementById("motivo").value;
+      const detalles = document.getElementById("detalles").value || "";
+      const registradoPor = document.getElementById("registrado_por").value.trim();
+      const accionTexto = tipo === 'cerrar' ? 'cerrar' : 'eliminar';
+
+      if (!placa || !motivo || !registradoPor) {
+          alert("⚠️ Debe completar placa, motivo y registrado por.");
+          return;
+      }
+
+      const confirmar = confirm(`¿Confirmar ${accionTexto} del ciclo para ${placa}?`);
+      if (!confirmar) return;
+
+      try {
+          const res = await fetch("/ciclos/accion", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                  placa,
+                  motivo,
+                  detalles,
+                  registrado_por: registradoPor,
+                  accion: tipo
+              })
+          });
+
+          if (res.ok) {
+              const data = await res.json();
+              alert(data.msg || "Acción realizada correctamente");
+              document.getElementById("formCiclo").reset();
               location.reload();
           } else {
               const error = await res.json();
